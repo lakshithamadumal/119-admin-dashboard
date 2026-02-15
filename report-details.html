@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en" class="layout-menu-fixed layout-compact" data-assets-path="assets/" data-template="vertical-menu-template-free">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Report Details - 119</title>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&ampdisplay=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/vendor/fonts/iconify-icons.css">
+    <link rel="stylesheet" href="assets/vendor/libs/node-waves/node-waves.css">
+    <link rel="stylesheet" href="assets/vendor/css/core.css">
+    <link rel="stylesheet" href="assets/css/demo.css">
+    <link rel="stylesheet" href="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css">
+    <script src="assets/vendor/js/helpers.js"></script>
+    <script src="assets/js/config.js"></script>
+  </head>
+  <body>
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <div class="layout-page">
+          <div class="content-wrapper">
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                <div>
+                  <h4 class="mb-1">Report Details</h4>
+                  <p class="text-body-secondary mb-0">Full incident record with user, medical, and membership context.</p>
+                </div>
+                <div class="btn-group">
+                  <button class="btn btn-secondary btn-sm" onclick="window.location.href='index.html'">Back to Dashboard</button>
+              </div>
+
+              <div id="report-details-content">
+                <div class="card mb-4">
+                  <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Incident Summary</h5>
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-sm btn-primary" id="detail-view-map" type="button">View Live Map</button>
+                      <button class="btn btn-sm btn-outline-primary" id="detail-copy-location" type="button">Get Location</button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label small text-muted">Report ID</label>
+                        <input class="form-control form-control-sm" id="detail-report-id" readonly>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label small text-muted">Category</label>
+                        <input class="form-control form-control-sm" id="detail-report-category" readonly>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label small text-muted">Priority</label>
+                        <div>
+                          <span class="badge bg-label-secondary" id="detail-report-priority">-</span>
+                        </div>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label small text-muted">Status</label>
+                        <input class="form-control form-control-sm" id="detail-report-status" readonly>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label small text-muted">Latitude</label>
+                        <input class="form-control form-control-sm" id="detail-report-latitude" readonly>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label small text-muted">Longitude</label>
+                        <input class="form-control form-control-sm" id="detail-report-longitude" readonly>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label small text-muted">Created Date</label>
+                        <input class="form-control form-control-sm" id="detail-report-created" readonly>
+                      </div>
+                      <div class="col-md-12">
+                        <label class="form-label small text-muted">Description</label>
+                        <textarea class="form-control form-control-sm" id="detail-report-description" rows="3" readonly></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                      <div class="card-header">
+                        <h6 class="mb-0">User Account Details</h6>
+                      </div>
+                      <div class="card-body">
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Name</label>
+                          <input class="form-control form-control-sm" id="detail-user-name" readonly>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Email</label>
+                          <input class="form-control form-control-sm" id="detail-user-email" readonly>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Phone</label>
+                          <input class="form-control form-control-sm" id="detail-user-phone" readonly>
+                        </div>
+                        <div class="mb-0">
+                          <label class="form-label small text-muted">Registered Date</label>
+                          <input class="form-control form-control-sm" id="detail-user-registered" readonly>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                      <div class="card-header">
+                        <h6 class="mb-0">Medical Information</h6>
+                      </div>
+                      <div class="card-body">
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Blood Group</label>
+                          <input class="form-control form-control-sm" id="detail-medical-blood" readonly>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Allergies</label>
+                          <input class="form-control form-control-sm" id="detail-medical-allergies" readonly>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Medical Conditions</label>
+                          <input class="form-control form-control-sm" id="detail-medical-conditions" readonly>
+                        </div>
+                        <div class="mb-0">
+                          <label class="form-label small text-muted">Emergency Contact</label>
+                          <input class="form-control form-control-sm" id="detail-medical-contact" readonly>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                      <div class="card-header">
+                        <h6 class="mb-0">Membership Information</h6>
+                      </div>
+                      <div class="card-body">
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Plan Name</label>
+                          <input class="form-control form-control-sm" id="detail-membership-plan" readonly>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Membership Status</label>
+                          <input class="form-control form-control-sm" id="detail-membership-status" readonly>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Start Date</label>
+                          <input class="form-control form-control-sm" id="detail-membership-start" readonly>
+                        </div>
+                        <div class="mb-0">
+                          <label class="form-label small text-muted">Expire Date</label>
+                          <input class="form-control form-control-sm" id="detail-membership-expire" readonly>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                      <div class="card-header">
+                        <h6 class="mb-0">Payment Information</h6>
+                      </div>
+                      <div class="card-body">
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Payment ID</label>
+                          <input class="form-control form-control-sm" id="detail-payment-id" readonly>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Transaction ID</label>
+                          <input class="form-control form-control-sm" id="detail-payment-transaction" readonly>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Amount</label>
+                          <input class="form-control form-control-sm" id="detail-payment-amount" readonly>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label small text-muted">Currency</label>
+                          <input class="form-control form-control-sm" id="detail-payment-currency" readonly>
+                        </div>
+                        <div class="mb-0">
+                          <label class="form-label small text-muted">Payment Status</label>
+                          <input class="form-control form-control-sm" id="detail-payment-status" readonly>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header">
+                    <h6 class="mb-0">Media Attachments</h6>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label small text-muted">Image</label>
+                        <div class="border rounded p-2 text-body-secondary" id="detail-media-image"></div>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label small text-muted">Audio</label>
+                        <div class="border rounded p-2 text-body-secondary" id="detail-media-audio"></div>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label small text-muted">Video</label>
+                        <div class="border rounded p-2 text-body-secondary" id="detail-media-video"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/vendor/js/bootstrap.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      const reportId = new URLSearchParams(window.location.search).get('reportId');
+      if (reportId) {
+        renderReportDetailsPage(reportId);
+      }
+    </script>
+  </body>
+</html>

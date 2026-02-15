@@ -1,0 +1,194 @@
+<div class="row gy-6">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h4 class="mb-1">Users & Memberships</h4>
+        <p class="text-body-secondary mb-0">View and manage registered users with membership information.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h5 class="mb-0">User Directory</h5>
+        <input type="text" class="form-control" placeholder="Search users..." style="width: 220px;">
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Membership Status</th>
+              <th>Created Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1" role="dialog" aria-labelledby="userDetailsModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userDetailsModalTitle">User Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- User Account Details -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h6 class="mb-0">Account Information</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">User ID</label>
+                <input type="text" class="form-control form-control-sm" id="modal-user-id" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Full Name</label>
+                <input type="text" class="form-control form-control-sm" id="modal-user-name" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Email</label>
+                <input type="email" class="form-control form-control-sm" id="modal-user-email" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Phone</label>
+                <input type="text" class="form-control form-control-sm" id="modal-user-phone" readonly>
+              </div>
+              <div class="col-md-12 mb-0">
+                <label class="form-label small text-muted">Created Date</label>
+                <input type="text" class="form-control form-control-sm" id="modal-user-created" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Medical Information -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h6 class="mb-0">Medical Information</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Blood Type</label>
+                <input type="text" class="form-control form-control-sm" id="modal-medical-blood" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Allergies</label>
+                <input type="text" class="form-control form-control-sm" id="modal-medical-allergies" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Emergency Contact</label>
+                <input type="text" class="form-control form-control-sm" id="modal-medical-contact" readonly>
+              </div>
+              <div class="col-md-6 mb-0">
+                <label class="form-label small text-muted">Contact Phone</label>
+                <input type="text" class="form-control form-control-sm" id="modal-medical-phone" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Membership Information -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h6 class="mb-0">Membership Information</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Membership ID</label>
+                <input type="text" class="form-control form-control-sm" id="modal-membership-id" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Plan Name</label>
+                <input type="text" class="form-control form-control-sm" id="modal-membership-plan" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Member Since</label>
+                <input type="text" class="form-control form-control-sm" id="modal-membership-start" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Membership Expires</label>
+                <input type="text" class="form-control form-control-sm" id="modal-membership-expire" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Next Renewal Date</label>
+                <input type="text" class="form-control form-control-sm" id="modal-membership-renewal" readonly>
+              </div>
+              <div class="col-md-6 mb-0">
+                <label class="form-label small text-muted">Status</label>
+                <input type="text" class="form-control form-control-sm" id="modal-membership-status" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="card mb-3">
+          <div class="card-header">
+            <h6 class="mb-0">Payment Information</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Payment ID</label>
+                <input type="text" class="form-control form-control-sm" id="modal-payment-id" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Amount</label>
+                <input type="text" class="form-control form-control-sm" id="modal-payment-amount" readonly>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label small text-muted">Payment Date</label>
+                <input type="text" class="form-control form-control-sm" id="modal-payment-date" readonly>
+              </div>
+              <div class="col-md-6 mb-0">
+                <label class="form-label small text-muted">Payment Status</label>
+                <input type="text" class="form-control form-control-sm" id="modal-payment-status" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User's Reports -->
+        <div class="card">
+          <div class="card-header">
+            <h6 class="mb-0">Reports Created by User <span class="badge bg-primary ms-2" id="modal-user-report-count">0</span></h6>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-sm table-hover">
+                <thead>
+                  <tr>
+                    <th>Report ID</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                  </tr>
+                </thead>
+                <tbody id="modal-user-reports-list"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

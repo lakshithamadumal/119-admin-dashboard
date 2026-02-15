@@ -1,0 +1,282 @@
+<div class="row gy-6">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h4 class="mb-1">Emergency Reports</h4>
+        <p class="text-body-secondary mb-0">Manage and track incoming emergency reports.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <h5 class="mb-0">Reports</h5>
+        <div class="d-flex gap-2">
+          <input type="text" class="form-control" placeholder="Search reports..." style="width: 220px;">
+          <select class="form-select" style="width: 160px;">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="in-progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Report ID</th>
+              <th>User ID</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reports-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="reportDetailsModal" tabindex="-1" aria-labelledby="reportDetailsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title" id="reportDetailsLabel">Report Inspection</h5>
+          <small class="text-body-secondary">Full report, user, membership, and payment information.</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-header">
+                <h6 class="mb-0">User Account Details</h6>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                      <tr>
+                        <th scope="row">Name</th>
+                        <td id="modal-user-name">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Email</th>
+                        <td id="modal-user-email">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Phone</th>
+                        <td id="modal-user-phone">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Registered Date</th>
+                        <td id="modal-user-registered">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-header">
+                <h6 class="mb-0">Medical Information</h6>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                      <tr>
+                        <th scope="row">Blood Group</th>
+                        <td id="modal-medical-blood">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Allergies</th>
+                        <td id="modal-medical-allergies">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Medical Conditions</th>
+                        <td id="modal-medical-conditions">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Emergency Contact</th>
+                        <td id="modal-medical-contact">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-header">
+                <h6 class="mb-0">Membership Information</h6>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                      <tr>
+                        <th scope="row">Plan Name</th>
+                        <td id="modal-membership-plan">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Membership Status</th>
+                        <td id="modal-membership-status">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Start Date</th>
+                        <td id="modal-membership-start">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Expire Date</th>
+                        <td id="modal-membership-expire">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-header">
+                <h6 class="mb-0">Payment Information</h6>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                      <tr>
+                        <th scope="row">Payment ID</th>
+                        <td id="modal-payment-id">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Transaction ID</th>
+                        <td id="modal-payment-transaction">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Amount</th>
+                        <td id="modal-payment-amount">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Currency</th>
+                        <td id="modal-payment-currency">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Payment Status</th>
+                        <td id="modal-payment-status">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h6 class="mb-0">Report Information</h6>
+                <button class="btn btn-success btn-sm" type="button" id="modal-view-map">View Live Map</button>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-sm table-borderless mb-0">
+                    <tbody>
+                      <tr>
+                        <th scope="row">Report ID</th>
+                        <td id="modal-report-id">-</td>
+                        <th scope="row">Category</th>
+                        <td id="modal-report-category">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Priority</th>
+                        <td id="modal-report-priority">-</td>
+                        <th scope="row">Current Status</th>
+                        <td id="modal-report-status">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Latitude</th>
+                        <td id="modal-report-latitude">-</td>
+                        <th scope="row">Longitude</th>
+                        <td id="modal-report-longitude">-</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Created Date</th>
+                        <td id="modal-report-created">-</td>
+                        <th scope="row">Description</th>
+                        <td id="modal-report-description">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="d-flex align-items-center gap-3 mt-4 flex-wrap">
+                  <div>
+                    <label class="form-label mb-1" for="modal-status-select">Status</label>
+                    <select class="form-select" id="modal-status-select" style="min-width: 200px;">
+                      <option value="Received">Received</option>
+                      <option value="Assigned">Assigned</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-primary" type="button" id="modal-save-status">Save Status</button>
+                  <span class="text-body-secondary" id="modal-status-feedback"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h6 class="mb-0">Media Attachments</h6>
+              </div>
+              <div class="card-body">
+                <div class="row g-4">
+                  <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                      <h6 class="mb-2">Image</h6>
+                      <div id="modal-media-image" class="text-body-secondary">No image attached</div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                      <h6 class="mb-2">Audio</h6>
+                      <div id="modal-media-audio" class="text-body-secondary">No audio attached</div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                      <h6 class="mb-2">Video</h6>
+                      <div id="modal-media-video" class="text-body-secondary">No video attached</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

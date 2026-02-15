@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Map - 119</title>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      html, body {
+        height: 100%;
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f5f5f9;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .map-header {
+        padding: 12px 18px;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .map-header h1 {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      .map-header small {
+        color: #6b7280;
+      }
+
+      .map-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .map-actions a {
+        text-decoration: none;
+        color: #696cff;
+        font-weight: 600;
+      }
+
+      #map {
+        flex: 1;
+        width: 100%;
+      }
+
+      .mapboxgl-popup {
+        max-width: 240px;
+        font-family: "Inter", sans-serif;
+      }
+
+      .mapboxgl-popup-content {
+        padding: 12px 12px 10px;
+        border-radius: 10px;
+      }
+
+      .mapboxgl-popup-content h3 {
+        margin: 0 0 6px;
+        font-size: 14px;
+      }
+
+      .mapboxgl-popup-content p {
+        margin: 0 0 6px;
+        color: #4b5563;
+        font-size: 12px;
+      }
+
+      .mapboxgl-popup-content a {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 6px 10px;
+        background: #696cff;
+        color: #ffffff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 12px;
+      }
+
+      .status-marker {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .status-marker.focused {
+        width: 20px;
+        height: 20px;
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+        animation: focusPulse 1.5s ease-out infinite;
+      }
+
+      @keyframes focusPulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+        }
+        70% {
+          box-shadow: 0 0 0 18px rgba(239, 68, 68, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+      }
+
+      .info-window {
+        font-size: 13px;
+        color: #111827;
+      }
+
+      .info-window h3 {
+        margin: 0 0 6px;
+        font-size: 14px;
+      }
+
+      .info-window p {
+        margin: 0 0 6px;
+        color: #4b5563;
+      }
+
+      .info-window a {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 6px 10px;
+        background: #696cff;
+        color: #ffffff;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="map-header">
+      <div>
+        <h1>Live Emergency Map</h1>
+        <small>Real-time report monitoring</small>
+      </div>
+      <div class="map-actions">
+        <a href="index.html" rel="noopener">Back to Dashboard</a>
+      </div>
+    </header>
+    <div id="map"></div>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <script>
+      mapboxgl.accessToken = 'pk.eyJ1IjoibGFreTIwMDMiLCJhIjoiY21sbmdpdXE4MHNsdDNlcHVkb2FtYWQ0ZiJ9.Nj48QIGZ9wSy8Zuw7NEUjQ';
+
+      const categories = [
+        { id: 1, name: 'Fire' },
+        { id: 2, name: 'Vehicle Accident' },
+        { id: 3, name: 'Women Safety' },
+        { id: 4, name: 'Landslide' }
+      ];
+
+      const reports = [
+        {
+          id: 1,
+          category_id: 1,
+          priority: 'High',
+          latitude: 6.9934,
+          longitude: 81.0550,
+          status: 'Assigned',
+          description: 'Fire reported near Badulla market area with heavy smoke.',
+          created_at: '2026-02-15 09:24'
+        },
+        {
+          id: 2,
+          category_id: 2,
+          priority: 'Medium',
+          latitude: 6.9271,
+          longitude: 79.8612,
+          status: 'In Progress',
+          description: 'Two-vehicle collision reported near Colombo 07 junction.',
+          created_at: '2026-02-15 08:42'
+        },
+        {
+          id: 3,
+          category_id: 3,
+          priority: 'Low',
+          latitude: 5.9496,
+          longitude: 80.5353,
+          status: 'Received',
+          description: 'Safety concern reported near Matara bus stand.',
+          created_at: '2026-02-15 08:05'
+        },
+        {
+          id: 4,
+          category_id: 4,
+          priority: 'Medium',
+          latitude: 6.9497,
+          longitude: 80.7891,
+          status: 'Completed',
+          description: 'Landslide cleared near Nuwara Eliya pass.',
+          created_at: '2026-02-14 19:40'
+        }
+      ];
+
+      const priorityColors = {
+        High: '#ef4444',
+        Medium: '#f59e0b',
+        Low: '#22c55e'
+      };
+
+      function getCategoryName(categoryId) {
+        const category = categories.find(item => item.id === categoryId);
+        return category ? category.name : 'Unknown';
+      }
+
+      function initMap() {
+        const params = new URLSearchParams(window.location.search);
+        const latParam = params.get('lat');
+        const lngParam = params.get('lng');
+        const reportIdParam = params.get('reportId');
+        const priorityParam = params.get('priority');
+        const center = [
+          lngParam ? Number(lngParam) : 79.8612,
+          latParam ? Number(latParam) : 6.9271
+        ];
+
+        const map = new mapboxgl.Map({
+          container: 'map',
+          style: 'mapbox://styles/mapbox/light-v11',
+          center,
+          zoom: latParam && lngParam ? 15 : 12
+        });
+
+        map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
+        const bounds = new mapboxgl.LngLatBounds();
+
+        const focusedReport = reportIdParam
+          ? reports.find(item => String(item.id) === String(reportIdParam))
+          : null;
+
+        reports.forEach(report => {
+          const markerEl = document.createElement('div');
+          markerEl.className = 'status-marker';
+          markerEl.style.backgroundColor = priorityColors[report.priority] || '#6b7280';
+          if (focusedReport && focusedReport.id === report.id) {
+            markerEl.classList.add('focused');
+          }
+
+          const categoryName = getCategoryName(report.category_id);
+          const popupContent = `
+            <h3>Report #${report.id}</h3>
+            <p>Category: ${categoryName}</p>
+            <p>Priority: ${report.priority}</p>
+            <p>Status: ${report.status}</p>
+            <p>Created: ${report.created_at}</p>
+            <a href="report-details.html?reportId=${report.id}">View Report</a>
+          `;
+
+          const popup = new mapboxgl.Popup({ offset: 16 }).setHTML(popupContent);
+
+          new mapboxgl.Marker(markerEl)
+            .setLngLat([report.longitude, report.latitude])
+            .setPopup(popup)
+            .addTo(map);
+
+          bounds.extend([report.longitude, report.latitude]);
+        });
+
+        if (!focusedReport && latParam && lngParam) {
+          const focusEl = document.createElement('div');
+          focusEl.className = 'status-marker focused';
+          focusEl.style.backgroundColor = priorityColors[priorityParam] || '#ef4444';
+          new mapboxgl.Marker(focusEl)
+            .setLngLat([Number(lngParam), Number(latParam)])
+            .addTo(map);
+        }
+
+        if (focusedReport) {
+          map.setCenter([focusedReport.longitude, focusedReport.latitude]);
+          map.setZoom(15);
+        } else if (latParam && lngParam) {
+          map.setCenter([Number(lngParam), Number(latParam)]);
+          map.setZoom(15);
+        } else if (reports.length) {
+          map.fitBounds(bounds, { padding: 60 });
+        }
+      }
+
+      initMap();
+    </script>
+  </body>
+</html>
