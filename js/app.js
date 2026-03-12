@@ -309,28 +309,28 @@ const categoriesData = [
   {
     id: 1,
     name: 'Fire',
-    description: 'Fire outbreaks and smoke incidents',
+    icon: createCategoryIconPlaceholder('Fire', '#ef4444'),
     status: 'Active',
     createdDate: '2024-05-01'
   },
   {
     id: 2,
     name: 'Vehicle Accident',
-    description: 'Road collisions and vehicle accidents',
+    icon: createCategoryIconPlaceholder('Vehicle Accident', '#f59e0b'),
     status: 'Active',
     createdDate: '2024-05-01'
   },
   {
     id: 3,
     name: 'Women Safety',
-    description: 'Women safety concerns and urgent assistance',
+    icon: createCategoryIconPlaceholder('Women Safety', '#6366f1'),
     status: 'Active',
     createdDate: '2024-05-01'
   },
   {
     id: 4,
     name: 'Landslide',
-    description: 'Landslides and road block hazards',
+    icon: createCategoryIconPlaceholder('Landslide', '#16a34a'),
     status: 'Active',
     createdDate: '2024-06-10'
   }
@@ -361,6 +361,7 @@ const notificationsData = [
 let currentPage = 'dashboard';
 let activeReportId = null;
 let activeCategoryId = null;
+let activeCategoryIcon = '';
 let emergencyAlertTimer = null;
 let sosSoundTimer = null;
 let pendingReportId = null;
@@ -469,6 +470,7 @@ function initializePageScripts(pageName) {
       break;
     case 'categories':
       renderCategoriesTable('categories-table-body', categoriesData);
+      initializeCategoriesModule();
       break;
     case 'memberships':
       renderMembershipsTable('memberships-table-body', membershipsData);
@@ -760,7 +762,14 @@ function renderCategoriesTable(targetId, data) {
       <tr>
         <td>${category.id}</td>
         <td>${category.name}</td>
-        <td>${category.description}</td>
+        <td>
+          <img
+            src="${category.icon || createCategoryIconPlaceholder(category.name, '#64748b')}"
+            alt="${category.name} icon"
+            class="rounded border"
+            style="width: 40px; height: 40px; object-fit: cover;"
+          >
+        </td>
         <td><span class="badge bg-label-info">${reportCount}</span></td>
         <td>
           <button class="btn btn-sm btn-warning me-1" onclick="openEditCategoryModal(${category.id})">Edit</button>
@@ -1266,11 +1275,66 @@ function handleReportStatusSave() {
   renderReportsTable('reports-table-body', reportsData);
 }
 
+function initializeCategoriesModule() {
+  const iconInput = document.getElementById('modal-category-icon');
+  if (!iconInput || iconInput.dataset.bound === 'true') {
+    return;
+  }
+
+  iconInput.addEventListener('change', handleCategoryIconUpload);
+  iconInput.dataset.bound = 'true';
+}
+
+function handleCategoryIconUpload(event) {
+  const [file] = event.target.files || [];
+  if (!file) {
+    return;
+  }
+
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload a valid image file.');
+    event.target.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    activeCategoryIcon = typeof reader.result === 'string' ? reader.result : '';
+    updateCategoryIconPreview(activeCategoryIcon);
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateCategoryIconPreview(iconValue) {
+  const previewWrap = document.getElementById('modal-category-icon-preview-wrap');
+  const previewImage = document.getElementById('modal-category-icon-preview');
+  if (!previewWrap || !previewImage) {
+    return;
+  }
+
+  if (iconValue) {
+    previewImage.src = iconValue;
+    previewWrap.classList.remove('d-none');
+  } else {
+    previewImage.src = '';
+    previewWrap.classList.add('d-none');
+  }
+}
+
+function createCategoryIconPlaceholder(name, backgroundColor) {
+  const firstLetter = (name || '?').trim().charAt(0).toUpperCase() || '?';
+  const safeColor = backgroundColor || '#64748b';
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'><rect width='96' height='96' rx='20' fill='${safeColor}'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='42' fill='#ffffff'>${firstLetter}</text></svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
 function openAddCategoryModal() {
   activeCategoryId = null;
+  activeCategoryIcon = '';
   document.getElementById('categoryModalTitle').textContent = 'Add Category';
   document.getElementById('modal-category-name').value = '';
-  document.getElementById('modal-category-description').value = '';
+  document.getElementById('modal-category-icon').value = '';
+  updateCategoryIconPreview('');
   
   const modalElement = document.getElementById('categoryModal');
   if (modalElement) {
@@ -1286,9 +1350,11 @@ function openEditCategoryModal(categoryId) {
   }
 
   activeCategoryId = categoryId;
+  activeCategoryIcon = category.icon || '';
   document.getElementById('categoryModalTitle').textContent = 'Edit Category';
   document.getElementById('modal-category-name').value = category.name;
-  document.getElementById('modal-category-description').value = category.description;
+  document.getElementById('modal-category-icon').value = '';
+  updateCategoryIconPreview(activeCategoryIcon);
   
   const modalElement = document.getElementById('categoryModal');
   if (modalElement) {
@@ -1299,15 +1365,15 @@ function openEditCategoryModal(categoryId) {
 
 function saveCategoryModal() {
   const name = document.getElementById('modal-category-name').value.trim();
-  const description = document.getElementById('modal-category-description').value.trim();
+  const icon = activeCategoryIcon;
   
   if (!name) {
     alert('Please enter a category name');
     return;
   }
   
-  if (!description) {
-    alert('Please enter a category description');
+  if (!icon) {
+    alert('Please upload a category icon');
     return;
   }
 
@@ -1316,7 +1382,7 @@ function saveCategoryModal() {
     const category = categoriesData.find(item => item.id === activeCategoryId);
     if (category) {
       category.name = name;
-      category.description = description;
+      category.icon = icon;
     }
   } else {
     // Add mode - create new category
@@ -1328,7 +1394,7 @@ function saveCategoryModal() {
     categoriesData.push({
       id: newId,
       name: name,
-      description: description,
+      icon: icon,
       status: 'Active',
       createdDate: today
     });

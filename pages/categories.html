@@ -21,7 +21,7 @@
             <tr>
               <th>Category ID</th>
               <th>Name</th>
-              <th>Description</th>
+              <th>Category Icon</th>
               <th>Total Reports</th>
               <th>Actions</th>
             </tr>
@@ -47,8 +47,12 @@
           <input type="text" class="form-control" id="modal-category-name" placeholder="Enter category name">
         </div>
         <div class="mb-3">
-          <label class="form-label">Description</label>
-          <textarea class="form-control" id="modal-category-description" rows="3" placeholder="Enter category description"></textarea>
+          <label class="form-label">Category Icon</label>
+          <input type="file" class="form-control" id="modal-category-icon" accept="image/*">
+          <div class="form-text">Upload an image for this category icon.</div>
+          <div class="mt-3 d-none" id="modal-category-icon-preview-wrap">
+            <img id="modal-category-icon-preview" src="" alt="Category icon preview" class="rounded border" style="width: 64px; height: 64px; object-fit: cover;">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
