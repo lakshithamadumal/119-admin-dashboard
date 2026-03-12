@@ -948,6 +948,25 @@ function openUserModal(userId) {
   }
 }
 
+function detailViewMap() {
+  const lat = (document.getElementById('detail-report-latitude') || {}).value || '';
+  const lng = (document.getElementById('detail-report-longitude') || {}).value || '';
+  const id  = (document.getElementById('detail-report-id') || {}).value || '';
+  const pri = (document.getElementById('detail-report-priority') || {}).textContent || '';
+  if (!lat || !lng) { alert('Location data not available.'); return; }
+  window.open(
+    `map.html?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&reportId=${encodeURIComponent(id)}&priority=${encodeURIComponent(pri)}`,
+    '_blank', 'noopener'
+  );
+}
+
+function detailCopyLocation() {
+  const lat = (document.getElementById('detail-report-latitude') || {}).value || '';
+  const lng = (document.getElementById('detail-report-longitude') || {}).value || '';
+  if (!lat || !lng) { alert('Location data not available.'); return; }
+  copyTextToClipboard(`https://www.google.com/maps?q=${lat},${lng}`);
+}
+
 function openReportMap(latitude, longitude, reportId, priority) {
   const lat = encodeURIComponent(latitude);
   const lng = encodeURIComponent(longitude);
