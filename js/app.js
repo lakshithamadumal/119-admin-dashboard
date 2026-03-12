@@ -498,14 +498,9 @@ function renderSosTable(targetId, data) {
       <tr>
         <td>${sos.sosId}</td>
         <td>${sos.userId}</td>
-        <td>${sos.category}</td>
-        <td>${priorityBadge}</td>
-        <td>${sos.latitude}</td>
-        <td>${sos.longitude}</td>
-        <td>${statusBadge}</td>
         <td>${sos.createdDate}</td>
         <td>
-          <a class="btn btn-sm btn-danger" target="_blank" href="sos-details.html?sosId=${sos.id}">
+          <a class="btn btn-sm btn-info" target="_blank" href="sos-details.html?sosId=${sos.id}">
             <i class="ri ri-alarm-warning-fill me-1"></i>View Report
           </a>
         </td>
@@ -611,6 +606,14 @@ function renderSosDetailsPage(sosId) {
   if (condEl) condEl.value = medical ? medical.conditions : '-';
   const contactEl = document.getElementById('sos-detail-medical-contact');
   if (contactEl) contactEl.value = medical ? medical.emergencyContact : '-';
+  const ec1NameEl = document.getElementById('sos-detail-ec1-name');
+  if (ec1NameEl) ec1NameEl.value = medical ? (medical.emergencyContact1Name || '-') : '-';
+  const ec1PhoneEl = document.getElementById('sos-detail-ec1-phone');
+  if (ec1PhoneEl) ec1PhoneEl.value = medical ? (medical.emergencyContact1Phone || '-') : '-';
+  const ec2NameEl = document.getElementById('sos-detail-ec2-name');
+  if (ec2NameEl) ec2NameEl.value = medical ? (medical.emergencyContact2Name || '-') : '-';
+  const ec2PhoneEl = document.getElementById('sos-detail-ec2-phone');
+  if (ec2PhoneEl) ec2PhoneEl.value = medical ? (medical.emergencyContact2Phone || '-') : '-';
 
   // Membership fields
   const planEl = document.getElementById('sos-detail-membership-plan');
@@ -973,6 +976,25 @@ function openReportMap(latitude, longitude, reportId, priority) {
   const id = reportId ? `&reportId=${encodeURIComponent(reportId)}` : '';
   const pr = priority ? `&priority=${encodeURIComponent(priority)}` : '';
   window.open(`map.html?lat=${lat}&lng=${lng}${id}${pr}`, '_blank', 'noopener');
+}
+
+function sosDetailViewMap() {
+  const lat = (document.getElementById('sos-detail-latitude') || {}).value || '';
+  const lng = (document.getElementById('sos-detail-longitude') || {}).value || '';
+  const id  = (document.getElementById('sos-detail-id') || {}).value || '';
+  const pri = (document.getElementById('sos-detail-priority') || {}).textContent || '';
+  if (!lat || !lng) { alert('Location data not available.'); return; }
+  window.open(
+    `map.html?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&sosId=${encodeURIComponent(id)}&priority=${encodeURIComponent(pri)}`,
+    '_blank', 'noopener'
+  );
+}
+
+function sosDetailCopyLocation() {
+  const lat = (document.getElementById('sos-detail-latitude') || {}).value || '';
+  const lng = (document.getElementById('sos-detail-longitude') || {}).value || '';
+  if (!lat || !lng) { alert('Location data not available.'); return; }
+  copyTextToClipboard(`https://www.google.com/maps?q=${lat},${lng}`);
 }
 
 function renderReportDetailsPage(reportId) {
