@@ -95,6 +95,12 @@
                                 <div data-i18n="Emergency Reports">Emergency Reports</div>
                             </a>
                         </li>
+                         <li class="menu-item">
+                            <a href="javascript:void(0);" class="menu-link" onclick="loadPage('sos')">
+                                <i class="menu-icon icon-base ri ri-alarm-line"></i>
+                                <div data-i18n="SOS Requests">SOS Requests</div>
+                            </a>
+                        </li>
                         <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link" onclick="openLiveMap()">
                                 <i class="menu-icon icon-base ri ri-map-pin-line"></i>
@@ -230,11 +236,29 @@
                                                 <div class="d-flex align-items-center">
                                                     <div class="avatar">
                                                         <div class="avatar-initial bg-danger rounded shadow-xs">
+                                                            <i class="icon-base ri ri-alarm-warning-fill icon-24px"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <p class="mb-0">Total SOS</p>
+                                                        <h5 class="mb-0" id="dashboard-total-sos">0</h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xl-3 col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar">
+                                                        <div class="avatar-initial bg-warning rounded shadow-xs">
                                                             <i class="icon-base ri ri-flashlight-line icon-24px"></i>
                                                         </div>
                                                     </div>
                                                     <div class="ms-3">
-                                                        <p class="mb-0">Active Emergencies</p>
+                                                        <p class="mb-0">Active Emergency</p>
                                                         <h5 class="mb-0" id="dashboard-active-emergencies">0</h5>
                                                     </div>
                                                 </div>
@@ -252,26 +276,8 @@
                                                         </div>
                                                     </div>
                                                     <div class="ms-3">
-                                                        <p class="mb-0">Registered Users</p>
-                                                        <h5 class="mb-0" id="dashboard-registered-users">0</h5>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xl-3 col-sm-6">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar">
-                                                        <div class="avatar-initial bg-info rounded shadow-xs">
-                                                            <i class="icon-base ri ri-shield-user-line icon-24px"></i>
-                                                        </div>
-                                                    </div>
-                                                    <div class="ms-3">
-                                                        <p class="mb-0">Active Memberships</p>
-                                                        <h5 class="mb-0" id="dashboard-active-memberships">0</h5>
+                                                        <p class="mb-0">All Members</p>
+                                                        <h5 class="mb-0" id="dashboard-all-members">0</h5>
                                                     </div>
                                                 </div>
                                             </div>

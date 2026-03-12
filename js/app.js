@@ -59,6 +59,42 @@ const reportsData = [
   }
 ];
 
+const sosData = [
+  {
+    id: 1,
+    sosId: 'SOS-3001',
+    userId: 'USR-204',
+    category: 'Fire',
+    priority: 'Critical',
+    latitude: '6.9934',
+    longitude: '81.0550',
+    status: 'Active',
+    createdDate: '2026-02-15 09:20'
+  },
+  {
+    id: 2,
+    sosId: 'SOS-3002',
+    userId: 'USR-188',
+    category: 'Vehicle Accident',
+    priority: 'Critical',
+    latitude: '6.9271',
+    longitude: '79.8612',
+    status: 'Active',
+    createdDate: '2026-02-15 08:38'
+  },
+  {
+    id: 3,
+    sosId: 'SOS-3003',
+    userId: 'USR-221',
+    category: 'Women Safety',
+    priority: 'High',
+    latitude: '5.9496',
+    longitude: '80.5353',
+    status: 'Resolved',
+    createdDate: '2026-02-14 22:15'
+  }
+];
+
 const usersData = [
   {
     id: 'USR-204',
@@ -375,6 +411,7 @@ function updatePageTitle(pageName) {
   const titles = {
     dashboard: 'Dashboard',
     reports: 'Emergency Reports',
+    sos: 'SOS Requests',
     users: 'Users',
     memberships: 'Memberships',
     payments: 'Payments',
@@ -407,16 +444,170 @@ function initializePageScripts(pageName) {
     case 'payments':
       renderPaymentsTable('payments-table-body', paymentsData);
       break;
+    case 'sos':
+      renderSosTable('sos-table-body', sosData);
+      initializeSosModule();
+      break;
     default:
       break;
   }
 }
 
+function renderSosTable(targetId, data) {
+  const tableBody = document.getElementById(targetId);
+  if (!tableBody) return;
+
+  tableBody.innerHTML = data.map(sos => {
+    const priorityBadge = buildBadge(sos.priority, badgeFromPriority(sos.priority));
+    const statusBadge = sos.status === 'Active'
+      ? `<span class="badge bg-danger">${sos.status}</span>`
+      : `<span class="badge bg-success">${sos.status}</span>`;
+    return `
+      <tr>
+        <td>${sos.sosId}</td>
+        <td>${sos.userId}</td>
+        <td>${sos.category}</td>
+        <td>${priorityBadge}</td>
+        <td>${sos.latitude}</td>
+        <td>${sos.longitude}</td>
+        <td>${statusBadge}</td>
+        <td>${sos.createdDate}</td>
+        <td>
+          <a class="btn btn-sm btn-danger" target="_blank" href="sos-details.html?sosId=${sos.id}">
+            <i class="ri ri-alarm-warning-fill me-1"></i>View Report
+          </a>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function initializeSosModule() {
+  const searchInput = document.getElementById('sos-search');
+  const statusFilter = document.getElementById('sos-status-filter');
+
+  function applyFilters() {
+    const query = searchInput ? searchInput.value.toLowerCase() : '';
+    const status = statusFilter ? statusFilter.value : '';
+    const filtered = sosData.filter(sos => {
+      const matchesSearch = !query ||
+        sos.sosId.toLowerCase().includes(query) ||
+        sos.userId.toLowerCase().includes(query) ||
+        sos.category.toLowerCase().includes(query);
+      const matchesStatus = !status || sos.status === status;
+      return matchesSearch && matchesStatus;
+    });
+    renderSosTable('sos-table-body', filtered);
+  }
+
+  if (searchInput) searchInput.addEventListener('input', applyFilters);
+  if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+}
+
+function renderSosDetailsPage(sosId) {
+  const sos = sosData.find(item => item.id === sosId);
+  if (!sos) return;
+
+  const user = usersData.find(item => item.id === sos.userId);
+  const membership = membershipsData.find(item => item.userId === sos.userId);
+  const payment = getLatestPaymentForUser(sos.userId);
+  const medical = medicalInfoData.find(item => item.userId === sos.userId);
+
+  // SOS incident fields
+  const idEl = document.getElementById('sos-detail-id');
+  if (idEl) idEl.value = sos.sosId;
+  const catEl = document.getElementById('sos-detail-category');
+  if (catEl) catEl.value = sos.category;
+  const latEl = document.getElementById('sos-detail-latitude');
+  if (latEl) latEl.value = sos.latitude;
+  const lngEl = document.getElementById('sos-detail-longitude');
+  if (lngEl) lngEl.value = sos.longitude;
+  const createdEl = document.getElementById('sos-detail-created');
+  if (createdEl) createdEl.value = sos.createdDate;
+
+  const priorityBadge = document.getElementById('sos-detail-priority');
+  if (priorityBadge) {
+    priorityBadge.textContent = sos.priority;
+    priorityBadge.className = 'badge fs-6 px-3 py-2 bg-label-' + badgeFromPriority(sos.priority);
+  }
+  const statusBadge = document.getElementById('sos-detail-status-badge');
+  if (statusBadge) {
+    statusBadge.textContent = sos.status;
+    statusBadge.className = 'badge fs-6 px-3 py-2 ' + (sos.status === 'Active' ? 'bg-danger' : 'bg-success');
+  }
+  const statusSelect = document.getElementById('sos-status-select');
+  if (statusSelect) statusSelect.value = sos.status;
+
+  // Map buttons
+  const mapBtn = document.getElementById('sos-detail-view-map');
+  if (mapBtn) mapBtn.onclick = () => openReportMap(sos.latitude, sos.longitude);
+  const copyBtn = document.getElementById('sos-detail-copy-location');
+  if (copyBtn) copyBtn.onclick = () => {
+    navigator.clipboard.writeText(`${sos.latitude}, ${sos.longitude}`);
+  };
+
+  // Status save
+  const saveBtn = document.getElementById('sos-save-status');
+  if (saveBtn) saveBtn.onclick = () => {
+    const newStatus = statusSelect ? statusSelect.value : sos.status;
+    sos.status = newStatus;
+    if (statusBadge) {
+      statusBadge.textContent = newStatus;
+      statusBadge.className = 'badge fs-6 px-3 py-2 ' + (newStatus === 'Active' ? 'bg-danger' : 'bg-success');
+    }
+    const feedback = document.getElementById('sos-status-feedback');
+    if (feedback) { feedback.classList.remove('d-none'); setTimeout(() => feedback.classList.add('d-none'), 3000); }
+  };
+
+  // User fields
+  const userIdEl = document.getElementById('sos-detail-user-id');
+  if (userIdEl) userIdEl.value = sos.userId;
+  const nameEl = document.getElementById('sos-detail-user-name');
+  if (nameEl) nameEl.value = user ? user.name : '-';
+  const emailEl = document.getElementById('sos-detail-user-email');
+  if (emailEl) emailEl.value = user ? user.email : '-';
+  const phoneEl = document.getElementById('sos-detail-user-phone');
+  if (phoneEl) phoneEl.value = user ? user.phone : '-';
+  const regEl = document.getElementById('sos-detail-user-registered');
+  if (regEl) regEl.value = user ? user.createdDate : '-';
+
+  // Medical fields
+  const bloodEl = document.getElementById('sos-detail-medical-blood');
+  if (bloodEl) bloodEl.value = medical ? medical.bloodGroup : '-';
+  const allerEl = document.getElementById('sos-detail-medical-allergies');
+  if (allerEl) allerEl.value = medical ? medical.allergies : '-';
+  const condEl = document.getElementById('sos-detail-medical-conditions');
+  if (condEl) condEl.value = medical ? medical.conditions : '-';
+  const contactEl = document.getElementById('sos-detail-medical-contact');
+  if (contactEl) contactEl.value = medical ? medical.emergencyContact : '-';
+
+  // Membership fields
+  const planEl = document.getElementById('sos-detail-membership-plan');
+  if (planEl) planEl.value = membership ? membership.planName : '-';
+  const memStatusEl = document.getElementById('sos-detail-membership-status');
+  if (memStatusEl) memStatusEl.value = membership ? membership.status : '-';
+  const startEl = document.getElementById('sos-detail-membership-start');
+  if (startEl) startEl.value = membership ? membership.startDate : '-';
+  const expireEl = document.getElementById('sos-detail-membership-expire');
+  if (expireEl) expireEl.value = membership ? membership.expireDate : '-';
+
+  // Payment fields
+  const payIdEl = document.getElementById('sos-detail-payment-id');
+  if (payIdEl) payIdEl.value = payment ? payment.paymentId : '-';
+  const txEl = document.getElementById('sos-detail-payment-transaction');
+  if (txEl) txEl.value = payment ? payment.transactionId : '-';
+  const amtEl = document.getElementById('sos-detail-payment-amount');
+  if (amtEl) amtEl.value = payment ? formatAmount(payment.amount, payment.currency) : '-';
+  const curEl = document.getElementById('sos-detail-payment-currency');
+  if (curEl) curEl.value = payment ? payment.currency : '-';
+  const payStatusEl = document.getElementById('sos-detail-payment-status');
+  if (payStatusEl) payStatusEl.value = payment ? payment.status : '-';
+}
+
 function renderDashboardWidgets() {
   setTextById('dashboard-total-reports', reportsData.length);
+  setTextById('dashboard-total-sos', sosData.length);
   setTextById('dashboard-active-emergencies', reportsData.filter(item => item.status !== 'Completed').length);
-  setTextById('dashboard-registered-users', usersData.length);
-  setTextById('dashboard-active-memberships', membershipsData.filter(item => item.status === 'Active').length);
+  setTextById('dashboard-all-members', usersData.length);
 
   renderReportsTable('dashboard-reports-table', reportsData.slice(0, 5), true);
 }
