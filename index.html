@@ -95,7 +95,7 @@
                                 <div data-i18n="Emergency Reports">Emergency Reports</div>
                             </a>
                         </li>
-                         <li class="menu-item">
+                        <li class="menu-item">
                             <a href="javascript:void(0);" class="menu-link" onclick="loadPage('sos')">
                                 <i class="menu-icon icon-base ri ri-alarm-line"></i>
                                 <div data-i18n="SOS Requests">SOS Requests</div>
@@ -118,285 +118,295 @@
                                 <i class="menu-icon icon-base ri ri-bookmark-3-line"></i>
                                 <div data-i18n="Categories">Categories</div>
                             </a>
-                        </li>
-                        <li class="menu-item" id="menu-emergency-alerts">
-                            <a href="javascript:void(0);" class="menu-link" onclick="triggerEmergencyAlert()">
-                                <i class="menu-icon icon-base ri ri-alarm-line"></i>
-                                <div data-i18n="Emergency Alerts">Emergency Alerts</div>
-                            </a>
-                        </li>
-                    </ul>
-                </aside>
-                <!-- / Menu -->
-                <!-- Layout container -->
-                <div class="layout-page">
-                    <!-- Navbar -->
-                    <nav class="layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
-                        <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
-                            <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
-                                <i class="icon-base ri ri-menu-line icon-md"></i>
-                            </a>
-                        </div>
-                        <div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
-                            <!-- Search -->
-                            <div class="navbar-nav align-items-center">
-                                <div class="nav-item d-flex align-items-center">
-                                    <i class="icon-base ri ri-search-line icon-lg lh-0"></i>
-                                    <input
-                                        type="text"
-                                        class="form-control border-0 shadow-none"
-                                        placeholder="Search..."
-                                        aria-label="Search..."
-                                    >
-                                </div>
+                            <li class="menu-item">
+                                <a href="javascript:void(0);" class="menu-link" onclick="loadPage('notification')">
+                                    <i class="menu-icon icon-base ri ri-notification-3-line"></i>
+                                    <div data-i18n="Notification">Notifications</div>
+                                </a>
+                            </li>
+                            <li class="menu-item">
+                                <a href="javascript:void(0);" class="menu-link" onclick="loadPage('Settings')">
+                                    <i class="menu-icon icon-base ri ri-settings-3-line"></i>
+                                    <div data-i18n="Settings">Settings</div>
+                                </a>
+                            </li>
+                            <li class="menu-item" id="menu-emergency-alerts">
+                                <a href="javascript:void(0);" class="menu-link" onclick="triggerEmergencyAlert()">
+                                    <i class="menu-icon icon-base ri ri-alarm-line"></i>
+                                    <div data-i18n="Emergency Alerts">Emergency Alerts</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </aside>
+                    <!-- / Menu -->
+                    <!-- Layout container -->
+                    <div class="layout-page">
+                        <!-- Navbar -->
+                        <nav class="layout-navbar container-xxl navbar-detached navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
+                            <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
+                                <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+                                    <i class="icon-base ri ri-menu-line icon-md"></i>
+                                </a>
                             </div>
-                            <!-- /Search -->
-                            <ul class="navbar-nav flex-row align-items-center ms-md-auto">
-                                <!-- User -->
-                                <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                                    <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
-                                        <div class="avatar avatar-online">
-                                            <img src="assets/img/avatars/1.png" alt="alt" class="rounded-circle">
-                                        </div>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="#">
-                                                <div class="d-flex">
-                                                    <div class="flex-shrink-0 me-3">
-                                                        <div class="avatar avatar-online">
-                                                            <img src="assets/img/avatars/1.png" alt="alt" class="w-px-40 h-auto rounded-circle">
+                            <div class="navbar-nav-right d-flex align-items-center justify-content-end" id="navbar-collapse">
+                                <!-- Search -->
+                                <div class="navbar-nav align-items-center">
+                                    <div class="nav-item d-flex align-items-center">
+                                        <i class="icon-base ri ri-search-line icon-lg lh-0"></i>
+                                        <input
+                                            type="text"
+                                            class="form-control border-0 shadow-none"
+                                            placeholder="Search..."
+                                            aria-label="Search..."
+                                        >
+                                    </div>
+                                </div>
+                                <!-- /Search -->
+                                <ul class="navbar-nav flex-row align-items-center ms-md-auto">
+                                    <!-- User -->
+                                    <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                                        <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                            <div class="avatar avatar-online">
+                                                <img src="assets/img/avatars/1.png" alt="alt" class="rounded-circle">
+                                            </div>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="#">
+                                                    <div class="d-flex">
+                                                        <div class="flex-shrink-0 me-3">
+                                                            <div class="avatar avatar-online">
+                                                                <img src="assets/img/avatars/1.png" alt="alt" class="w-px-40 h-auto rounded-circle">
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-0">Lakshitha Madumal</h6>
+                                                            <small class="text-body-secondary">Admin</small>
                                                         </div>
                                                     </div>
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-0">Lakshitha Madumal</h6>
-                                                        <small class="text-body-secondary">Admin</small>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <div class="dropdown-divider my-1"></div>
-                                        </li>
-                                        <li>
-                                            <div class="d-grid px-4 pt-2 pb-1">
-                                                <a class="btn btn-danger d-flex" href="login.html">
-                                                    <small class="align-middle">Logout</small>
-                                                    <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                                                 </a>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <!--/ User -->
-                            </ul>
-                        </div>
-                    </nav>
-                    <!-- / Navbar -->
-                    <!-- Content wrapper -->
-                    <div class="content-wrapper">
-                        <!-- Content -->
-                        <div class="container-xxl flex-grow-1 container-p-y">
-                            <div id="main-content">
-                                <div class="row gy-6">
-                                    <div class="col-12">
-                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                                            <div>
-                                                <h4 class="mb-1">Emergency Operations Overview</h4>
-                                                <p class="text-body-secondary mb-0">Monitor incoming reports, active incidents, and membership coverage.</p>
-                                            </div>
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-primary btn-sm" type="button" onclick="loadPage('reports')">View Reports</button>
-                                                <button class="btn btn-outline-primary btn-sm" type="button" onclick="openLiveMap()">Open Live Map</button>
+                                            </li>
+                                            <li>
+                                                <div class="dropdown-divider my-1"></div>
+                                            </li>
+                                            <li>
+                                                <div class="d-grid px-4 pt-2 pb-1">
+                                                    <a class="btn btn-danger d-flex" href="login.html">
+                                                        <small class="align-middle">Logout</small>
+                                                        <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <!--/ User -->
+                                </ul>
+                            </div>
+                        </nav>
+                        <!-- / Navbar -->
+                        <!-- Content wrapper -->
+                        <div class="content-wrapper">
+                            <!-- Content -->
+                            <div class="container-xxl flex-grow-1 container-p-y">
+                                <div id="main-content">
+                                    <div class="row gy-6">
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                                                <div>
+                                                    <h4 class="mb-1">Emergency Operations Overview</h4>
+                                                    <p class="text-body-secondary mb-0">Monitor incoming reports, active incidents, and membership coverage.</p>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-primary btn-sm" type="button" onclick="loadPage('reports')">View Reports</button>
+                                                    <button class="btn btn-outline-primary btn-sm" type="button" onclick="openLiveMap()">Open Live Map</button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="col-xl-3 col-sm-6">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar">
-                                                        <div class="avatar-initial bg-primary rounded shadow-xs">
-                                                            <i class="icon-base ri ri-alarm-warning-line icon-24px"></i>
+                                        <div class="col-xl-3 col-sm-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar">
+                                                            <div class="avatar-initial bg-primary rounded shadow-xs">
+                                                                <i class="icon-base ri ri-alarm-warning-line icon-24px"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="ms-3">
+                                                            <p class="mb-0">Total Reports</p>
+                                                            <h5 class="mb-0" id="dashboard-total-reports">0</h5>
                                                         </div>
                                                     </div>
-                                                    <div class="ms-3">
-                                                        <p class="mb-0">Total Reports</p>
-                                                        <h5 class="mb-0" id="dashboard-total-reports">0</h5>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="col-xl-3 col-sm-6">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar">
-                                                        <div class="avatar-initial bg-danger rounded shadow-xs">
-                                                            <i class="icon-base ri ri-alarm-warning-fill icon-24px"></i>
+                                        <div class="col-xl-3 col-sm-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar">
+                                                            <div class="avatar-initial bg-danger rounded shadow-xs">
+                                                                <i class="icon-base ri ri-alarm-warning-fill icon-24px"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="ms-3">
+                                                            <p class="mb-0">Total SOS</p>
+                                                            <h5 class="mb-0" id="dashboard-total-sos">0</h5>
                                                         </div>
                                                     </div>
-                                                    <div class="ms-3">
-                                                        <p class="mb-0">Total SOS</p>
-                                                        <h5 class="mb-0" id="dashboard-total-sos">0</h5>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="col-xl-3 col-sm-6">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar">
-                                                        <div class="avatar-initial bg-warning rounded shadow-xs">
-                                                            <i class="icon-base ri ri-flashlight-line icon-24px"></i>
+                                        <div class="col-xl-3 col-sm-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar">
+                                                            <div class="avatar-initial bg-warning rounded shadow-xs">
+                                                                <i class="icon-base ri ri-flashlight-line icon-24px"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="ms-3">
+                                                            <p class="mb-0">Active Emergency</p>
+                                                            <h5 class="mb-0" id="dashboard-active-emergencies">0</h5>
                                                         </div>
                                                     </div>
-                                                    <div class="ms-3">
-                                                        <p class="mb-0">Active Emergency</p>
-                                                        <h5 class="mb-0" id="dashboard-active-emergencies">0</h5>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="col-xl-3 col-sm-6">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar">
-                                                        <div class="avatar-initial bg-success rounded shadow-xs">
-                                                            <i class="icon-base ri ri-group-line icon-24px"></i>
+                                        <div class="col-xl-3 col-sm-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar">
+                                                            <div class="avatar-initial bg-success rounded shadow-xs">
+                                                                <i class="icon-base ri ri-group-line icon-24px"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="ms-3">
+                                                            <p class="mb-0">All Members</p>
+                                                            <h5 class="mb-0" id="dashboard-all-members">0</h5>
                                                         </div>
                                                     </div>
-                                                    <div class="ms-3">
-                                                        <p class="mb-0">All Members</p>
-                                                        <h5 class="mb-0" id="dashboard-all-members">0</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="card h-100">
+                                                <div class="card-header d-flex align-items-center justify-content-between">
+                                                    <h5 class="card-title mb-0">Emergency Trend (7 Days)</h5>
+                                                    <span class="badge bg-label-primary">Live</span>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="weeklyOverviewChart"></div>
+                                                    <div class="mt-4">
+                                                        <div class="d-flex align-items-center gap-4">
+                                                            <h4 class="mb-0" id="dashboard-trend-percent">+18%</h4>
+                                                            <p class="mb-0">Higher report volume than last week.</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="col-12">
-                                        <div class="card h-100">
-                                            <div class="card-header d-flex align-items-center justify-content-between">
-                                                <h5 class="card-title mb-0">Emergency Trend (7 Days)</h5>
-                                                <span class="badge bg-label-primary">Live</span>
-                                            </div>
-                                            <div class="card-body">
-                                                <div id="weeklyOverviewChart"></div>
-                                                <div class="mt-4">
-                                                    <div class="d-flex align-items-center gap-4">
-                                                        <h4 class="mb-0" id="dashboard-trend-percent">+18%</h4>
-                                                        <p class="mb-0">Higher report volume than last week.</p>
-                                                    </div>
+                                        <div class="col-12">
+                                            <div class="card overflow-hidden">
+                                                <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                    <h5 class="mb-0">Recent Emergency Reports</h5>
+                                                    <button class="btn btn-sm btn-primary" type="button" onclick="loadPage('reports')">View All</button>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="col-12">
-                                        <div class="card overflow-hidden">
-                                            <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                                <h5 class="mb-0">Recent Emergency Reports</h5>
-                                                <button class="btn btn-sm btn-primary" type="button" onclick="loadPage('reports')">View All</button>
-                                            </div>
-                                            <div class="table-responsive">
-                                                <table class="table table-sm">
-                                                    <thead>
-                                                        <tr>
-                                                            <th class="text-truncate">Report ID</th>
-                                                            <th class="text-truncate">Category</th>
-                                                            <th class="text-truncate">Priority</th>
-                                                            <th class="text-truncate">Status</th>
-                                                            <th class="text-truncate">Created Date</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="dashboard-reports-table"></tbody>
-                                                </table>
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="text-truncate">Report ID</th>
+                                                                <th class="text-truncate">Category</th>
+                                                                <th class="text-truncate">Priority</th>
+                                                                <th class="text-truncate">Status</th>
+                                                                <th class="text-truncate">Created Date</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="dashboard-reports-table"></tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <!-- / Content -->
+                            <div class="content-backdrop fade"></div>
                         </div>
-                        <!-- / Content -->
-                        
-                        <div class="content-backdrop fade"></div>
+                        <!-- Content wrapper -->
                     </div>
-                    <!-- Content wrapper -->
+                    <!-- / Layout page -->
                 </div>
-                <!-- / Layout page -->
+                <!-- Overlay -->
+                <div class="layout-overlay layout-menu-toggle"></div>
             </div>
-            <!-- Overlay -->
-            <div class="layout-overlay layout-menu-toggle"></div>
-        </div>
-        <!-- / Layout wrapper -->
-        <audio id="sos-audio" src="assets/alert/emergency-sound.mp3" preload="auto"></audio>
-        <div class="modal fade" id="sosAlertModal" tabindex="-1" aria-labelledby="sosAlertTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content sos-alert-pulse">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="sosAlertTitle">SOS Alert Received</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="text-center mb-3">
-                            <img
-                                src="assets/img/illustrations/warning-alert.png"
-                                alt="Warning alert"
-                                style="max-width: 120px; width: 100%;"
-                            >
+            <!-- / Layout wrapper -->
+            <audio id="sos-audio" src="assets/alert/emergency-sound.mp3" preload="auto"></audio>
+            <div
+                class="modal fade"
+                id="sosAlertModal"
+                tabindex="-1"
+                aria-labelledby="sosAlertTitle"
+                aria-hidden="true"
+            >
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content sos-alert-pulse">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="sosAlertTitle">SOS Alert Received</h5>
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            ></button>
                         </div>
-                        <div class="alert alert-danger d-flex align-items-center" role="alert">
-                            <i class="icon-base ri ri-alarm-warning-line me-2"></i>
-                            <div>Emergency SOS alert detected. Immediate action required.</div>
+                        <div class="modal-body">
+                            <div class="text-center mb-3">
+                                <img src="assets/img/illustrations/warning-alert.png" alt="Warning alert" style="max-width: 120px; width: 100%;">
+                            </div>
+                            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                <i class="icon-base ri ri-alarm-warning-line me-2"></i>
+                                <div>Emergency SOS alert detected. Immediate action required.</div>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-body-secondary">User Name</small>
+                                <div class="fw-semibold" id="sos-user">-</div>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-body-secondary">Category</small>
+                                <div class="fw-semibold" id="sos-category">-</div>
+                            </div>
+                            <div class="mb-0">
+                                <small class="text-body-secondary">Priority</small>
+                                <div class="fw-semibold" id="sos-priority">-</div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <small class="text-body-secondary">User Name</small>
-                            <div class="fw-semibold" id="sos-user">-</div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                            <a class="btn btn-danger btn-sm" id="sos-view-report" href="index.html">View Report</a>
                         </div>
-                        <div class="mb-3">
-                            <small class="text-body-secondary">Category</small>
-                            <div class="fw-semibold" id="sos-category">-</div>
-                        </div>
-                        <div class="mb-0">
-                            <small class="text-body-secondary">Priority</small>
-                            <div class="fw-semibold" id="sos-priority">-</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                        <a class="btn btn-danger btn-sm" id="sos-view-report" href="index.html">View Report</a>
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- Core JS -->
-        <script src="assets/vendor/libs/jquery/jquery.js"></script>
-        <script src="assets/vendor/libs/popper/popper.js"></script>
-        <script src="assets/vendor/js/bootstrap.js"></script>
-        <script src="assets/vendor/libs/node-waves/node-waves.js"></script>
-        <script src="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-        <script src="assets/vendor/js/menu.js"></script>
-        <!-- endbuild -->
-        <!-- Vendors JS -->
-        <script src="assets/vendor/libs/apex-charts/apexcharts.js"></script>
-        <!-- Main JS -->
-        <script src="assets/js/main.js"></script>
-        <!-- Page JS -->
-        <script src="assets/js/dashboards-analytics.js"></script>
-        <!-- App JS -->
-        <script src="js/app.js"></script>
-        <!-- Place this tag before closing body tag for github widget button. -->
-        <script async="async" defer="defer" src="https://buttons.github.io/buttons.js"></script>
-    </body>
-</html>
+            <!-- Core JS -->
+            <script src="assets/vendor/libs/jquery/jquery.js"></script>
+            <script src="assets/vendor/libs/popper/popper.js"></script>
+            <script src="assets/vendor/js/bootstrap.js"></script>
+            <script src="assets/vendor/libs/node-waves/node-waves.js"></script>
+            <script src="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+            <script src="assets/vendor/js/menu.js"></script>
+            <!-- endbuild -->
+            <!-- Vendors JS -->
+            <script src="assets/vendor/libs/apex-charts/apexcharts.js"></script>
+            <!-- Main JS -->
+            <script src="assets/js/main.js"></script>
+            <!-- Page JS -->
+            <script src="assets/js/dashboards-analytics.js"></script>
+            <!-- App JS -->
+            <script src="js/app.js"></script>
+            <!-- Place this tag before closing body tag for github widget button. -->
+            <script async="async" defer="defer" src="https://buttons.github.io/buttons.js"></script>
+        </body>
+    </html>
