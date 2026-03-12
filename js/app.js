@@ -396,6 +396,14 @@ let notificationSequence = notificationsData.reduce((max, notification) => {
   const numericPart = Number(String(notification.id || '').replace(/\D/g, ''));
   return Number.isNaN(numericPart) ? max : Math.max(max, numericPart);
 }, 5000);
+const SETTINGS_STORAGE_KEY = 'dashboard_settings_v1';
+const defaultAppSettings = {
+  subscriptionPriceLkr: membershipsData[0] ? membershipsData[0].amount : 5000,
+  operatorContactNumber: '+94 11 900 0119'
+};
+let appSettings = loadAppSettings();
+
+applySubscriptionPriceAcrossData(appSettings.subscriptionPriceLkr);
 
 function openLiveMap() {
   window.open('map.html', '_blank', 'noopener');
@@ -505,6 +513,9 @@ function initializePageScripts(pageName) {
       break;
     case 'notification':
       initializeNotificationModule();
+      break;
+    case 'settings':
+      initializeSettingsModule();
       break;
     case 'memberships':
       renderMembershipsTable('memberships-table-body', membershipsData);
@@ -991,6 +1002,109 @@ function initializeNotificationModule() {
 
   if (userFilter) {
     userFilter.addEventListener('change', applyNotificationFilters);
+  }
+}
+
+function loadAppSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (!raw) {
+      return Object.assign({}, defaultAppSettings);
+    }
+
+    const parsed = JSON.parse(raw);
+    return {
+      subscriptionPriceLkr: Number(parsed.subscriptionPriceLkr) > 0 ? Number(parsed.subscriptionPriceLkr) : defaultAppSettings.subscriptionPriceLkr,
+      operatorContactNumber: String(parsed.operatorContactNumber || '').trim() || defaultAppSettings.operatorContactNumber
+    };
+  } catch (error) {
+    console.warn('Unable to load settings from storage:', error);
+    return Object.assign({}, defaultAppSettings);
+  }
+}
+
+function saveAppSettings() {
+  localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(appSettings));
+}
+
+function applySubscriptionPriceAcrossData(amount) {
+  membershipsData.forEach(membership => {
+    membership.amount = amount;
+  });
+
+  paymentsData.forEach(payment => {
+    payment.amount = amount;
+  });
+}
+
+function showSettingsFeedback(elementId) {
+  const feedback = document.getElementById(elementId);
+  if (!feedback) {
+    return;
+  }
+
+  feedback.classList.remove('d-none');
+  setTimeout(() => feedback.classList.add('d-none'), 2500);
+}
+
+function saveSubscriptionPrice() {
+  const input = document.getElementById('settings-subscription-price');
+  if (!input) {
+    return;
+  }
+
+  const amount = Number(input.value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    alert('Please enter a valid subscription price in LKR.');
+    return;
+  }
+
+  appSettings.subscriptionPriceLkr = amount;
+  applySubscriptionPriceAcrossData(amount);
+  saveAppSettings();
+
+  renderMembershipsTable('memberships-table-body', membershipsData);
+  renderPaymentsTable('payments-table-body', paymentsData);
+  showSettingsFeedback('settings-subscription-feedback');
+}
+
+function saveOperatorContactNumber() {
+  const input = document.getElementById('settings-operator-contact');
+  if (!input) {
+    return;
+  }
+
+  const operatorContactNumber = input.value.trim();
+  if (!operatorContactNumber) {
+    alert('Please enter an operator contact number.');
+    return;
+  }
+
+  appSettings.operatorContactNumber = operatorContactNumber;
+  saveAppSettings();
+  showSettingsFeedback('settings-contact-feedback');
+}
+
+function initializeSettingsModule() {
+  const priceInput = document.getElementById('settings-subscription-price');
+  const operatorInput = document.getElementById('settings-operator-contact');
+  const saveSubscriptionButton = document.getElementById('settings-save-subscription');
+  const saveContactButton = document.getElementById('settings-save-contact');
+
+  if (priceInput) {
+    priceInput.value = String(appSettings.subscriptionPriceLkr);
+  }
+
+  if (operatorInput) {
+    operatorInput.value = appSettings.operatorContactNumber;
+  }
+
+  if (saveSubscriptionButton) {
+    saveSubscriptionButton.addEventListener('click', saveSubscriptionPrice);
+  }
+
+  if (saveContactButton) {
+    saveContactButton.addEventListener('click', saveOperatorContactNumber);
   }
 }
 

@@ -1,0 +1,61 @@
+<div class="row gy-6">
+  <div class="col-12">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div>
+        <h4 class="mb-1">Settings</h4>
+        <p class="text-body-secondary mb-0">Update subscription pricing and operator contact details for emergency operations.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <h5 class="mb-0">Subscription Price</h5>
+      </div>
+      <div class="card-body">
+        <label for="settings-subscription-price" class="form-label">Subscription Price (LKR)</label>
+        <div class="input-group mb-3">
+          <span class="input-group-text">LKR</span>
+          <input
+            type="number"
+            min="1"
+            step="1"
+            class="form-control"
+            id="settings-subscription-price"
+            placeholder="Enter subscription price"
+          >
+        </div>
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-primary" id="settings-save-subscription">Save</button>
+        </div>
+        <div class="alert alert-success d-none mt-3 mb-0" id="settings-subscription-feedback" role="alert">
+          Subscription price saved successfully.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <h5 class="mb-0">Operator Contact</h5>
+      </div>
+      <div class="card-body">
+        <label for="settings-operator-contact" class="form-label">Operator Contact Number</label>
+        <input
+          type="tel"
+          class="form-control mb-3"
+          id="settings-operator-contact"
+          placeholder="e.g. +94 11 900 0119"
+        >
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-primary" id="settings-save-contact">Save</button>
+        </div>
+        <div class="alert alert-success d-none mt-3 mb-0" id="settings-contact-feedback" role="alert">
+          Operator contact number saved successfully.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
