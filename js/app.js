@@ -964,17 +964,6 @@ function renderReportDetailsPage(reportId) {
   setTextById('detail-medical-conditions', medical ? medical.conditions : '-');
   setTextById('detail-medical-contact', medical ? medical.emergencyContact : '-');
 
-  setTextById('detail-membership-plan', membership ? membership.planName : '-');
-  setTextById('detail-membership-status', membership ? membership.status : '-');
-  setTextById('detail-membership-start', membership ? membership.startDate : '-');
-  setTextById('detail-membership-expire', membership ? membership.expireDate : '-');
-
-  setTextById('detail-payment-id', payment ? payment.paymentId : '-');
-  setTextById('detail-payment-transaction', payment ? payment.transactionId : '-');
-  setTextById('detail-payment-amount', payment ? formatAmount(payment.amount, payment.currency) : '-');
-  setTextById('detail-payment-currency', payment ? payment.currency : '-');
-  setTextById('detail-payment-status', payment ? payment.status : '-');
-
   const mediaImage = document.getElementById('detail-media-image');
   if (mediaImage) {
     if (media && media.image) {
