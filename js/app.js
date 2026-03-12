@@ -102,6 +102,8 @@ const usersData = [
     email: 'lakshitha@example.com',
     phone: '+94 77 123 4567',
     membershipStatus: 'Active',
+    nic: '199712345678V',
+    address: 'No. 45, Badulla Road, Ella, Badulla',
     createdDate: '2025-11-08'
   },
   {
@@ -110,6 +112,8 @@ const usersData = [
     email: 'nimal.perera@example.com',
     phone: '+94 71 678 2211',
     membershipStatus: 'Active',
+    nic: '198834567891V',
+    address: 'No. 12, Flower Road, Colombo 07',
     createdDate: '2025-10-21'
   },
   {
@@ -118,6 +122,8 @@ const usersData = [
     email: 'shalini.j@example.com',
     phone: '+94 76 889 4455',
     membershipStatus: 'Active',
+    nic: '200123456789V',
+    address: 'No. 78, Matara Road, Matara',
     createdDate: '2025-09-02'
   },
   {
@@ -126,6 +132,8 @@ const usersData = [
     email: 'hiruni.a@example.com',
     phone: '+94 75 223 9011',
     membershipStatus: 'Pending',
+    nic: '199956789012V',
+    address: 'No. 22, Kandy Road, Kandy',
     createdDate: '2025-08-18'
   }
 ];
@@ -222,28 +230,48 @@ const medicalInfoData = [
     bloodGroup: 'A+',
     allergies: 'Penicillin',
     conditions: 'Hypertension',
-    emergencyContact: 'Kavindu Madumal - +94 77 345 8899'
+    currentMedications: 'Amlodipine 5mg',
+    emergencyContact: 'Kavindu Madumal - +94 77 345 8899',
+    emergencyContact1Name: 'Kavindu Madumal',
+    emergencyContact1Phone: '+94 77 345 8899',
+    emergencyContact2Name: 'Priya Madumal',
+    emergencyContact2Phone: '+94 71 567 1234'
   },
   {
     userId: 'USR-188',
     bloodGroup: 'B-',
     allergies: 'None',
     conditions: 'Asthma',
-    emergencyContact: 'Nimali Perera - +94 71 333 2200'
+    currentMedications: 'Salbutamol Inhaler',
+    emergencyContact: 'Nimali Perera - +94 71 333 2200',
+    emergencyContact1Name: 'Nimali Perera',
+    emergencyContact1Phone: '+94 71 333 2200',
+    emergencyContact2Name: 'Roshan Perera',
+    emergencyContact2Phone: '+94 77 444 5566'
   },
   {
     userId: 'USR-221',
     bloodGroup: 'O+',
     allergies: 'Seafood',
     conditions: 'Diabetes',
-    emergencyContact: 'Saman Jayasuriya - +94 76 555 9090'
+    currentMedications: 'Metformin 500mg',
+    emergencyContact: 'Saman Jayasuriya - +94 76 555 9090',
+    emergencyContact1Name: 'Saman Jayasuriya',
+    emergencyContact1Phone: '+94 76 555 9090',
+    emergencyContact2Name: 'Kumari Jayasuriya',
+    emergencyContact2Phone: '+94 71 789 4321'
   },
   {
     userId: 'USR-151',
     bloodGroup: 'AB+',
     allergies: 'None',
     conditions: 'None',
-    emergencyContact: 'Harini Abeyratne - +94 75 821 4455'
+    currentMedications: 'None',
+    emergencyContact: 'Harini Abeyratne - +94 75 821 4455',
+    emergencyContact1Name: 'Harini Abeyratne',
+    emergencyContact1Phone: '+94 75 821 4455',
+    emergencyContact2Name: 'Danuka Abeyratne',
+    emergencyContact2Phone: '+94 76 234 5678'
   }
 ];
 
@@ -954,15 +982,31 @@ function renderReportDetailsPage(reportId) {
   setTextById('detail-report-created', report.createdDate);
   setTextById('detail-report-description', report.description || '-');
 
+  setTextById('detail-user-total-reports', userTotalReports);
   setTextById('detail-user-name', user ? user.name : '-');
   setTextById('detail-user-email', user ? user.email : '-');
   setTextById('detail-user-phone', user ? user.phone : '-');
   setTextById('detail-user-registered', user ? user.createdDate : '-');
+  setTextById('detail-user-address', user ? (user.address || '-') : '-');
+  setTextById('detail-user-nic', user ? (user.nic || '-') : '-');
 
   setTextById('detail-medical-blood', medical ? medical.bloodGroup : '-');
   setTextById('detail-medical-allergies', medical ? medical.allergies : '-');
   setTextById('detail-medical-conditions', medical ? medical.conditions : '-');
-  setTextById('detail-medical-contact', medical ? medical.emergencyContact : '-');
+  setTextById('detail-medical-medications', medical ? (medical.currentMedications || '-') : '-');
+
+  const subStatusEl = document.getElementById('detail-subscription-status');
+  if (subStatusEl) {
+    const st = membership ? membership.status : '-';
+    const tone = st === 'Active' ? 'success' : st === 'Pending' ? 'warning' : st === 'Expired' ? 'danger' : 'secondary';
+    subStatusEl.textContent = st;
+    subStatusEl.className = `badge bg-label-${tone}`;
+  }
+  setTextById('detail-subscription-expiry', membership ? membership.expireDate : '-');
+  setTextById('detail-ec1-name', medical ? (medical.emergencyContact1Name || '-') : '-');
+  setTextById('detail-ec1-phone', medical ? (medical.emergencyContact1Phone || '-') : '-');
+  setTextById('detail-ec2-name', medical ? (medical.emergencyContact2Name || '-') : '-');
+  setTextById('detail-ec2-phone', medical ? (medical.emergencyContact2Phone || '-') : '-');
 
   const mediaImage = document.getElementById('detail-media-image');
   if (mediaImage) {
@@ -991,6 +1035,26 @@ function renderReportDetailsPage(reportId) {
     const mapUrl = `https://www.google.com/maps?q=${report.latitude},${report.longitude}`;
     locationButton.onclick = () => copyTextToClipboard(mapUrl);
   }
+
+  setReportStatus(report.status || 'Received');
+}
+
+function setReportStatus(status) {
+  setTextById('detail-report-status', status);
+  setTextById('detail-status-label', status);
+
+  const btnMap = {
+    'Received':    { id: 'status-btn-received',   cls: 'btn-secondary' },
+    'Assigned':    { id: 'status-btn-assigned',   cls: 'btn-info' },
+    'In Progress': { id: 'status-btn-inprogress', cls: 'btn-warning' },
+    'Completed':   { id: 'status-btn-completed',  cls: 'btn-success' }
+  };
+
+  Object.entries(btnMap).forEach(([s, { id, cls }]) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.className = `btn btn-sm ${s === status ? cls : 'btn-outline-' + cls.replace('btn-', '')}`;
+  });
 }
 
 function triggerEmergencyAlert() {
