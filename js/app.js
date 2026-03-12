@@ -15,7 +15,8 @@ const reportsData = [
     longitude: '81.0550',
     status: 'Assigned',
     description: 'Fire reported near Badulla market area with heavy smoke.',
-    createdDate: '2026-02-15 09:24'
+    createdDate: '2026-02-15 09:24',
+    statusHistory: { Received: '2026-02-15 09:24', Assigned: '2026-02-15 10:15' }
   },
   {
     id: 2,
@@ -28,7 +29,8 @@ const reportsData = [
     longitude: '79.8612',
     status: 'In Progress',
     description: 'Two-vehicle collision reported near Colombo 07 junction.',
-    createdDate: '2026-02-15 08:42'
+    createdDate: '2026-02-15 08:42',
+    statusHistory: { Received: '2026-02-15 08:42', Assigned: '2026-02-15 09:30', 'In Progress': '2026-02-15 10:45' }
   },
   {
     id: 3,
@@ -41,13 +43,13 @@ const reportsData = [
     longitude: '80.5353',
     status: 'Received',
     description: 'Safety concern reported near Matara bus stand.',
-    createdDate: '2026-02-15 08:05'
+    createdDate: '2026-02-15 08:05',
+    statusHistory: { Received: '2026-02-15 08:05' }
   },
   {
     id: 4,
     categoryId: 4,
     reportId: 'RPT-1004',
-    status: 'Completed',
     userId: 'USR-204',
     category: 'Landslide',
     priority: 'Medium',
@@ -55,7 +57,8 @@ const reportsData = [
     longitude: '80.7891',
     status: 'Completed',
     description: 'Landslide cleared near Nuwara Eliya pass.',
-    createdDate: '2026-02-14 19:40'
+    createdDate: '2026-02-14 19:40',
+    statusHistory: { Received: '2026-02-14 19:40', Assigned: '2026-02-14 20:15', 'In Progress': '2026-02-14 21:30', Completed: '2026-02-14 22:45' }
   }
 ];
 
@@ -361,6 +364,7 @@ let activeCategoryId = null;
 let emergencyAlertTimer = null;
 let sosSoundTimer = null;
 let pendingReportId = null;
+let currentStatusHistory = {};
 
 function openLiveMap() {
   window.open('map.html', '_blank', 'noopener');
@@ -1036,25 +1040,66 @@ function renderReportDetailsPage(reportId) {
     locationButton.onclick = () => copyTextToClipboard(mapUrl);
   }
 
-  setReportStatus(report.status || 'Received');
+  currentStatusHistory = Object.assign({ Received: report.createdDate }, report.statusHistory || {});
+  renderStatusTimeline(report.status || 'Received');
 }
 
-function setReportStatus(status) {
-  setTextById('detail-report-status', status);
-  setTextById('detail-status-label', status);
+function setReportStatus(newStatus) {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const formatted = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  currentStatusHistory[newStatus] = formatted;
+  renderStatusTimeline(newStatus);
+}
 
-  const btnMap = {
-    'Received':    { id: 'status-btn-received',   cls: 'btn-secondary' },
-    'Assigned':    { id: 'status-btn-assigned',   cls: 'btn-info' },
-    'In Progress': { id: 'status-btn-inprogress', cls: 'btn-warning' },
-    'Completed':   { id: 'status-btn-completed',  cls: 'btn-success' }
-  };
+function renderStatusTimeline(currentStatus) {
+  const steps = [
+    { key: 'Received',    dotId: 'sdot-received',   timeId: 'stime-received',   lineId: 'sline-received' },
+    { key: 'Assigned',    dotId: 'sdot-assigned',   timeId: 'stime-assigned',   lineId: 'sline-assigned' },
+    { key: 'In Progress', dotId: 'sdot-inprogress', timeId: 'stime-inprogress', lineId: 'sline-inprogress' },
+    { key: 'Completed',   dotId: 'sdot-completed',  timeId: 'stime-completed',  lineId: null }
+  ];
+  const currentIdx = steps.findIndex(s => s.key === currentStatus);
+  const doneColor = '#28c76f';
+  const activeColor = '#7367f0';
+  const baseStyle = 'width:28px;height:28px;font-size:11px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;';
 
-  Object.entries(btnMap).forEach(([s, { id, cls }]) => {
-    const btn = document.getElementById(id);
-    if (!btn) return;
-    btn.className = `btn btn-sm ${s === status ? cls : 'btn-outline-' + cls.replace('btn-', '')}`;
+  steps.forEach(({ key, dotId, timeId, lineId }, idx) => {
+    const dot = document.getElementById(dotId);
+    const timeEl = document.getElementById(timeId);
+    const lineEl = lineId ? document.getElementById(lineId) : null;
+    if (!dot) return;
+    if (timeEl) timeEl.textContent = currentStatusHistory[key] || '-';
+    if (idx < currentIdx) {
+      dot.style.cssText = baseStyle + `background:${doneColor};color:#fff;border:none;`;
+      dot.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+      if (lineEl) lineEl.style.background = doneColor;
+    } else if (idx === currentIdx) {
+      dot.style.cssText = baseStyle + `background:${activeColor};color:#fff;border:none;`;
+      dot.innerHTML = String(idx + 1);
+      if (lineEl) lineEl.style.background = '#dee2e6';
+    } else {
+      dot.style.cssText = baseStyle + 'background:#f0f0f0;color:#adb5bd;border:2px solid #dee2e6;';
+      dot.innerHTML = String(idx + 1);
+      if (lineEl) lineEl.style.background = '#dee2e6';
+    }
   });
+
+  setTextById('detail-report-status', currentStatus);
+
+  const badge = document.getElementById('detail-status-badge');
+  if (badge) {
+    const tones = { Received: 'secondary', Assigned: 'info', 'In Progress': 'warning', Completed: 'success' };
+    badge.textContent = currentStatus;
+    badge.className = `badge bg-label-${tones[currentStatus] || 'secondary'}`;
+  }
+
+  const btnAssigned   = document.getElementById('status-btn-assigned');
+  const btnInProgress = document.getElementById('status-btn-inprogress');
+  const btnCompleted  = document.getElementById('status-btn-completed');
+  if (btnAssigned)   btnAssigned.className   = `btn btn-sm ${currentStatus === 'Assigned'    ? 'btn-info'    : 'btn-outline-info'}`;
+  if (btnInProgress) btnInProgress.className = `btn btn-sm ${currentStatus === 'In Progress' ? 'btn-warning' : 'btn-outline-warning'}`;
+  if (btnCompleted)  btnCompleted.className  = `btn btn-sm ${currentStatus === 'Completed'   ? 'btn-success' : 'btn-outline-success'}`;
 }
 
 function triggerEmergencyAlert() {
