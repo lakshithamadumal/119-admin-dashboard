@@ -38,6 +38,7 @@ function renderReportDetailsPage(reportId) {
   const payment = getLatestPaymentForUser(report.userId);
   const medical = medicalInfoData.find(item => item.userId === report.userId);
   const media = reportMediaData.find(item => item.reportId === report.reportId);
+  const userTotalReports = reportsData.filter(item => item.userId === report.userId).length;
 
   setTextById('detail-report-id', report.reportId);
   setTextById('detail-report-category', report.category);
@@ -66,13 +67,7 @@ function renderReportDetailsPage(reportId) {
   setTextById('detail-medical-conditions', medical ? medical.conditions : '-');
   setTextById('detail-medical-medications', medical ? (medical.currentMedications || '-') : '-');
 
-  const subStatusEl = document.getElementById('detail-subscription-status');
-  if (subStatusEl) {
-    const st = membership ? membership.status : '-';
-    const tone = st === 'Active' ? 'success' : st === 'Pending' ? 'warning' : st === 'Expired' ? 'danger' : 'secondary';
-    subStatusEl.textContent = st;
-    subStatusEl.className = `badge bg-label-${tone}`;
-  }
+  setTextById('detail-subscription-status', membership ? membership.status : (payment ? payment.status : '-'));
   setTextById('detail-subscription-expiry', membership ? membership.expireDate : '-');
   setTextById('detail-ec1-name', medical ? (medical.emergencyContact1Name || '-') : '-');
   setTextById('detail-ec1-phone', medical ? (medical.emergencyContact1Phone || '-') : '-');

@@ -38,42 +38,38 @@ function openUserModal(userId) {
   setTextById('modal-user-name', user.name);
   setTextById('modal-user-email', user.email);
   setTextById('modal-user-phone', user.phone);
-  setTextById('modal-user-created', user.createdDate);
+  setTextById('modal-user-nic', user.nic || '-');
+  setTextById('modal-user-registered', user.createdDate || '-');
+  setTextById('modal-user-address', user.address || '-');
 
   // Populate medical information
   setTextById('modal-medical-blood', medical ? medical.bloodGroup : '-');
   setTextById('modal-medical-allergies', medical ? medical.allergies : '-');
-  setTextById('modal-medical-contact', medical ? medical.emergencyContact : '-');
-  setTextById('modal-medical-phone', medical ? medical.emergencyPhone : '-');
+  setTextById('modal-medical-conditions', medical ? medical.conditions : '-');
+  setTextById('modal-medical-medications', medical ? (medical.currentMedications || '-') : '-');
 
   // Populate membership information
-  if (membership) {
-    setTextById('modal-membership-id', membership.id);
-    setTextById('modal-membership-plan', membership.planName);
-    setTextById('modal-membership-start', membership.startDate);
-    setTextById('modal-membership-expire', membership.expireDate);
-    setTextById('modal-membership-renewal', membership.expireDate);
-    setTextById('modal-membership-status', membership.status);
-  } else {
-    setTextById('modal-membership-id', '-');
-    setTextById('modal-membership-plan', '-');
-    setTextById('modal-membership-start', '-');
-    setTextById('modal-membership-expire', '-');
-    setTextById('modal-membership-renewal', '-');
-    setTextById('modal-membership-status', 'No Active Membership');
-  }
+  const subscriptionStatus = membership ? membership.status : (payment ? payment.status : 'No Active Membership');
+  const subscriptionExpiry = membership ? membership.expireDate : '-';
+  setTextById('modal-subscription-status', subscriptionStatus);
+  setTextById('modal-subscription-expiry', subscriptionExpiry);
 
-  // Populate payment information
-  if (payment) {
-    setTextById('modal-payment-id', payment.paymentId);
-    setTextById('modal-payment-amount', formatAmount(payment.amount, payment.currency));
-    setTextById('modal-payment-date', payment.paymentDate);
-    setTextById('modal-payment-status', payment.status);
-  } else {
-    setTextById('modal-payment-id', '-');
-    setTextById('modal-payment-amount', '-');
-    setTextById('modal-payment-date', '-');
-    setTextById('modal-payment-status', 'No Payment Records');
+  // Populate emergency contacts
+  setTextById('modal-ec1-name', medical ? (medical.emergencyContact1Name || '-') : '-');
+  setTextById('modal-ec1-phone', medical ? (medical.emergencyContact1Phone || '-') : '-');
+  setTextById('modal-ec2-name', medical ? (medical.emergencyContact2Name || '-') : '-');
+  setTextById('modal-ec2-phone', medical ? (medical.emergencyContact2Phone || '-') : '-');
+
+  // Populate media section with first available report image for this user
+  const mediaImageContainer = document.getElementById('modal-media-image');
+  if (mediaImageContainer) {
+    const userReportIds = userReports.map(item => item.reportId);
+    const userMedia = reportMediaData.find(item => userReportIds.includes(item.reportId) && item.image);
+    if (userMedia && userMedia.image) {
+      mediaImageContainer.innerHTML = `<img src="${userMedia.image}" alt="User report image" class="img-fluid rounded">`;
+    } else {
+      mediaImageContainer.textContent = 'No image uploaded';
+    }
   }
 
   // Populate user's reports
