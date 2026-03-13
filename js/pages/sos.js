@@ -8,14 +8,15 @@ function renderSosTable(targetId, data) {
   if (!tableBody) return;
 
   tableBody.innerHTML = data.map(sos => {
-    const priorityBadge = buildBadge(sos.priority, badgeFromPriority(sos.priority));
-    const statusBadge = sos.status === 'Active'
-      ? `<span class="badge bg-danger">${sos.status}</span>`
-      : `<span class="badge bg-success">${sos.status}</span>`;
+    const user = usersData.find(item => item.id === sos.userId);
+    const userName = user ? user.name : sos.userId;
+    const userContact = user ? user.phone : '-';
+
     return `
       <tr>
         <td>${sos.sosId}</td>
-        <td>${sos.userId}</td>
+        <td>${userName}</td>
+        <td>${userContact}</td>
         <td>${sos.createdDate}</td>
         <td>
           <a class="btn btn-sm btn-info" target="_blank" href="sos-details.html?sosId=${sos.id}">
@@ -33,14 +34,23 @@ function initializeSosModule() {
   function applyFilters() {
     const query = searchInput ? searchInput.value.toLowerCase() : '';
     const status = statusFilter ? statusFilter.value : '';
+
     const filtered = sosData.filter(sos => {
+      const user = usersData.find(item => item.id === sos.userId);
+      const userName = user ? user.name.toLowerCase() : '';
+      const userPhone = user ? user.phone.toLowerCase() : '';
+
       const matchesSearch = !query ||
         sos.sosId.toLowerCase().includes(query) ||
         sos.userId.toLowerCase().includes(query) ||
-        sos.category.toLowerCase().includes(query);
+        sos.category.toLowerCase().includes(query) ||
+        userName.includes(query) ||
+        userPhone.includes(query);
+
       const matchesStatus = !status || sos.status === status;
       return matchesSearch && matchesStatus;
     });
+
     renderSosTable('sos-table-body', filtered);
   }
 
