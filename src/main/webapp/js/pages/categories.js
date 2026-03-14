@@ -9,6 +9,11 @@ function renderCategoriesTable(targetId, data) {
     return;
   }
 
+  if (!data.length) {
+    tableBody.innerHTML = buildEmptyTableRow(5, 'No categories available. Add category data in js/data.js or load it from your API.');
+    return;
+  }
+
   tableBody.innerHTML = data.map(category => {
     const reportCount = reportsData.filter(r => r.categoryId === category.id).length;
 

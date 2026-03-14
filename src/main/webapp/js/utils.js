@@ -77,6 +77,10 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+function buildEmptyTableRow(colspan, message) {
+  return `<tr><td colspan="${colspan}" class="text-center text-body-secondary py-4">${escapeHtml(message)}</td></tr>`;
+}
+
 function badgeFromPriority(priority) {
   const map = {
     High: 'danger',

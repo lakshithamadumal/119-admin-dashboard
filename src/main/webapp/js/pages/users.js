@@ -9,6 +9,11 @@ function renderUsersTable(targetId, data) {
     return;
   }
 
+  if (!data.length) {
+    tableBody.innerHTML = buildEmptyTableRow(7, 'No users available. Load user data into js/data.js or your API response first.');
+    return;
+  }
+
   tableBody.innerHTML = data.map(user => `
     <tr>
       <td>${user.id}</td>

@@ -9,6 +9,11 @@ function renderPaymentsTable(targetId, data) {
     return;
   }
 
+  if (!data.length) {
+    tableBody.innerHTML = buildEmptyTableRow(8, 'No payments available. Load payment data into js/data.js or your API response first.');
+    return;
+  }
+
   tableBody.innerHTML = data.map(payment => `
     <tr>
       <td>${payment.orderId}</td>

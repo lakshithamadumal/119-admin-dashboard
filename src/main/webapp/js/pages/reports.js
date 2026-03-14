@@ -9,6 +9,11 @@ function renderReportsTable(targetId, data, compact) {
     return;
   }
 
+  if (!data.length) {
+    tableBody.innerHTML = buildEmptyTableRow(compact ? 5 : 9, 'No reports available. Load report data into js/data.js or your API response first.');
+    return;
+  }
+
   const rows = data.map(report => {
     const priorityBadge = buildBadge(report.priority, badgeFromPriority(report.priority));
     const statusBadge = buildBadge(report.status, badgeFromReportStatus(report.status));

@@ -162,63 +162,27 @@
     </header>
     <div id="map"></div>
 
+    <script src="js/utils.js"></script>
+    <script src="js/data.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoibGFreTIwMDMiLCJhIjoiY21sbmdpdXE4MHNsdDNlcHVkb2FtYWQ0ZiJ9.Nj48QIGZ9wSy8Zuw7NEUjQ';
 
-      const categories = [
-        { id: 1, name: 'Fire' },
-        { id: 2, name: 'Vehicle Accident' },
-        { id: 3, name: 'Women Safety' },
-        { id: 4, name: 'Landslide' }
-      ];
-
-      const reports = [
-        {
-          id: 1,
-          reportId: 'RPT-1001',
-          category_id: 1,
-          priority: 'High',
-          latitude: 6.9934,
-          longitude: 81.0550,
-          status: 'Assigned',
-          description: 'Fire reported near Badulla market area with heavy smoke.',
-          created_at: '2026-02-15 09:24'
-        },
-        {
-          id: 2,
-          reportId: 'RPT-1002',
-          category_id: 2,
-          priority: 'Medium',
-          latitude: 6.9271,
-          longitude: 79.8612,
-          status: 'In Progress',
-          description: 'Two-vehicle collision reported near Colombo 07 junction.',
-          created_at: '2026-02-15 08:42'
-        },
-        {
-          id: 3,
-          reportId: 'RPT-1003',
-          category_id: 3,
-          priority: 'Low',
-          latitude: 5.9496,
-          longitude: 80.5353,
-          status: 'Received',
-          description: 'Safety concern reported near Matara bus stand.',
-          created_at: '2026-02-15 08:05'
-        },
-        {
-          id: 4,
-          reportId: 'RPT-1004',
-          category_id: 4,
-          priority: 'Medium',
-          latitude: 6.9497,
-          longitude: 80.7891,
-          status: 'Completed',
-          description: 'Landslide cleared near Nuwara Eliya pass.',
-          created_at: '2026-02-14 19:40'
-        }
-      ];
+      // Load categoriesData and reportsData in js/data.js or replace these mappings with your API payload.
+      const categories = categoriesData;
+      const reports = reportsData
+        .map(report => ({
+          id: report.id,
+          reportId: report.reportId,
+          category_id: report.categoryId,
+          priority: report.priority,
+          latitude: parseCoordinate(report.latitude, -90, 90),
+          longitude: parseCoordinate(report.longitude, -180, 180),
+          status: report.status,
+          description: report.description,
+          created_at: report.createdDate
+        }))
+        .filter(report => report.latitude !== null && report.longitude !== null);
 
       const priorityColors = {
         High: '#ef4444',

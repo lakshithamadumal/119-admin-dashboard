@@ -9,6 +9,11 @@ function renderMembershipsTable(targetId, data) {
     return;
   }
 
+  if (!data.length) {
+    tableBody.innerHTML = buildEmptyTableRow(7, 'No memberships available. Load membership data into js/data.js or your API response first.');
+    return;
+  }
+
   tableBody.innerHTML = data.map(membership => `
     <tr>
       <td>${membership.membershipId}</td>

@@ -49,6 +49,14 @@
     }
   };
 
+  const dashboardChartData = {
+    // Populate these arrays from your backend before rendering dashboard charts.
+    weeklyOverviewSeries: [],
+    weeklyOverviewCategories: [],
+    totalProfitSeries: [],
+    sessionsSeries: []
+  };
+
   // Weekly Overview Line Chart
   // --------------------------------------------------------------------
   const weeklyOverviewChartEl = document.querySelector('#weeklyOverviewChart'),
@@ -66,7 +74,7 @@
       series: [
         {
           name: 'Sales',
-          data: [32, 55, 45, 75, 55, 35, 70]
+          data: dashboardChartData.weeklyOverviewSeries
         }
       ],
       colors: [chartBgColor],
@@ -109,7 +117,7 @@
         axisTicks: { show: false },
         crosshairs: { opacity: 0 },
         axisBorder: { show: false },
-        categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        categories: dashboardChartData.weeklyOverviewCategories,
         tickPlacement: 'on',
         labels: {
           show: false
@@ -193,7 +201,7 @@
       },
       series: [
         {
-          data: [0, 20, 5, 30, 15, 45]
+          data: dashboardChartData.totalProfitSeries
         }
       ],
       tooltip: {
@@ -356,7 +364,7 @@
       },
       series: [
         {
-          data: [30, 70, 50, 40, 60]
+          data: dashboardChartData.sessionsSeries
         }
       ],
       responsive: [

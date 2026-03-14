@@ -1,6 +1,6 @@
 ﻿/**
  * Emergency Operations System - Core Application
- * Handles navigation, dashboard widgets, and emergency alerts.
+ * Handles navigation and dashboard widgets.
  * Depends on: js/utils.js, js/data.js, and all js/pages/*.js modules
  */
 
@@ -18,15 +18,6 @@ function handleLogout() {
  */
 function loadPage(pageName) {
   if (pageName === 'dashboard') {
-    stopSosAlertSound();
-    clearEmergencyHighlight();
-    const modalElement = document.getElementById('sosAlertModal');
-    if (modalElement) {
-      const modalInstance = bootstrap.Modal.getInstance(modalElement);
-      if (modalInstance) {
-        modalInstance.hide();
-      }
-    }
     window.location.href = 'index.html';
     return;
   }
@@ -137,108 +128,6 @@ function renderDashboardWidgets() {
   setTextById('dashboard-active-emergencies', reportsData.filter(item => item.status !== 'Completed').length);
   setTextById('dashboard-all-members', usersData.length);
 
-}
-
-function triggerEmergencyAlert() {
-  const highPriorityReport = reportsData.find(item => item.priority === 'High') || reportsData[0];
-  const highPriorityUser = usersData.find(item => item.id === highPriorityReport.userId);
-  const simulatedReport = {
-    id: highPriorityReport.id,
-    user: highPriorityUser ? highPriorityUser.name : 'Unknown User',
-    category: highPriorityReport.category,
-    priority: highPriorityReport.priority
-  };
-
-  highlightEmergencyMenu();
-  showEmergencyAlert(simulatedReport);
-
-  if (!emergencyAlertTimer) {
-    emergencyAlertTimer = setTimeout(() => {
-      showEmergencyAlert(simulatedReport);
-      emergencyAlertTimer = null;
-    }, 5000);
-  }
-}
-
-function highlightEmergencyMenu() {
-  document.querySelectorAll('.menu-item').forEach(item => {
-    item.classList.remove('active');
-  });
-
-  const alertMenu = document.getElementById('menu-emergency-alerts');
-  if (alertMenu) {
-    alertMenu.classList.add('active');
-    alertMenu.classList.add('sos-alert-active');
-  }
-}
-
-function clearEmergencyHighlight() {
-  const alertMenu = document.getElementById('menu-emergency-alerts');
-  if (alertMenu) {
-    alertMenu.classList.remove('sos-alert-active');
-  }
-}
-
-function showEmergencyAlert(report) {
-  setTextById('sos-user', report.user);
-  setTextById('sos-category', report.category);
-  setTextById('sos-priority', report.priority);
-
-  const viewLink = document.getElementById('sos-view-report');
-  if (viewLink) {
-    viewLink.href = `index.html?reportId=${report.id}`;
-    viewLink.onclick = () => {
-      stopSosAlertSound();
-      clearEmergencyHighlight();
-    };
-  }
-
-  const modalElement = document.getElementById('sosAlertModal');
-  if (modalElement) {
-    if (!modalElement.dataset.sosBound) {
-      modalElement.addEventListener('hidden.bs.modal', () => {
-        stopSosAlertSound();
-        clearEmergencyHighlight();
-      });
-      modalElement.dataset.sosBound = 'true';
-    }
-    const modalInstance = new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: false });
-    modalInstance.show();
-  }
-
-  startSosAlertSound();
-}
-
-function startSosAlertSound() {
-  const audio = document.getElementById('sos-audio');
-  if (!audio) {
-    return;
-  }
-
-  audio.currentTime = 0;
-  audio.play().catch(() => {});
-
-  if (sosSoundTimer) {
-    clearInterval(sosSoundTimer);
-  }
-
-  sosSoundTimer = setInterval(() => {
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
-  }, 2500);
-}
-
-function stopSosAlertSound() {
-  if (sosSoundTimer) {
-    clearInterval(sosSoundTimer);
-    sosSoundTimer = null;
-  }
-
-  const audio = document.getElementById('sos-audio');
-  if (audio) {
-    audio.pause();
-    audio.currentTime = 0;
-  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

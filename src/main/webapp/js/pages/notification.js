@@ -9,6 +9,11 @@ function renderNotificationsList(targetId, data) {
     return;
   }
 
+  if (!data.length) {
+    list.innerHTML = '<li class="text-body-secondary">No notifications available.</li>';
+    return;
+  }
+
   list.innerHTML = data.map(notification => `
     <li class="d-flex align-items-start mb-4">
       <span class="badge bg-label-${badgeFromPriority(notification.level)} me-3">${escapeHtml(notification.level)}</span>

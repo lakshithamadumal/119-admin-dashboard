@@ -7,6 +7,11 @@ function renderSosTable(targetId, data) {
   const tableBody = document.getElementById(targetId);
   if (!tableBody) return;
 
+  if (!data.length) {
+    tableBody.innerHTML = buildEmptyTableRow(5, 'No SOS records available. Load SOS data into js/data.js or your API response first.');
+    return;
+  }
+
   tableBody.innerHTML = data.map(sos => {
     const user = usersData.find(item => item.id === sos.userId);
     const userName = user ? user.name : sos.userId;
