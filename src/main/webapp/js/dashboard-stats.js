@@ -46,7 +46,7 @@ function updateWeeklyTrendChart(trendData) {
         }],
         chart: {
             type: 'bar',
-            height: 200,
+            height: 330,
             toolbar: { show: false }
         },
         plotOptions: {
