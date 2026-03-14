@@ -158,10 +158,7 @@
         }
       }
     };
-  if (typeof weeklyOverviewChartEl !== undefined && weeklyOverviewChartEl !== null) {
-    const weeklyOverviewChart = new ApexCharts(weeklyOverviewChartEl, weeklyOverviewChartConfig);
-    weeklyOverviewChart.render();
-  }
+  // weeklyOverviewChart is handled by dashboard-stats.js with live data
 
   // Total Profit line chart
   // --------------------------------------------------------------------
