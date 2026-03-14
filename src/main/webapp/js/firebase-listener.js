@@ -83,7 +83,7 @@ function triggerSweetEmergencyAlert(data, type) {
         denyButtonColor: '#696cff',
         showCancelButton: true,
         cancelButtonText: 'Close',
-        backdrop: isSOS ? 'rgba(255, 0, 0, 0.3)' : 'rgba(105, 108, 255, 0.1)',
+        backdrop: isSOS ? 'rgba(105, 108, 255, 0.1)' : 'rgba(105, 108, 255, 0.1)',
         allowOutsideClick: false
     }).then((result) => {
         if (result.isConfirmed && hasCoordinates) {
