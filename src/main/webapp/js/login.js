@@ -19,6 +19,11 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        const btn = form.querySelector("button[type='submit']");
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>`;
+
         const formData = new URLSearchParams(new FormData(form));
 
         fetch("login-auth", {
@@ -30,6 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(response => response.text())
         .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
 
             if (data.trim() === "success") {
 
@@ -74,6 +81,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         })
         .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
 
             Swal.fire({
                 icon: "error",
