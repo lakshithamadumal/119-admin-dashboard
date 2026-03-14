@@ -1,13 +1,24 @@
 package lk.iamlaky.controller;
 
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.*;
-import com.google.gson.Gson;
-import lk.iamlaky.config.FirebaseConfig;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.gson.Gson;
+
+import lk.iamlaky.config.FirebaseConfig;
 
 @WebServlet(name = "GetDashboardStats", urlPatterns = {"/get-stats"})
 public class GetDashboardStats extends HttpServlet {
