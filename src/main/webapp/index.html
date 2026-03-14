@@ -27,6 +27,8 @@
         <link rel="stylesheet" href="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css">
         <!-- endbuild -->
         <link rel="stylesheet" href="assets/vendor/libs/apex-charts/apex-charts.css">
+        <!-- Sweet Alert -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <style>
             .sos-alert-pulse {
                 box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.6);
@@ -180,7 +182,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
-                                                            <h6 class="mb-0">Lakshitha Madumal</h6>
+                                                            <h6 class="mb-0">119 Emergency</h6>
                                                             <small class="text-body-secondary">Admin</small>
                                                         </div>
                                                     </div>
@@ -191,7 +193,7 @@
                                             </li>
                                             <li>
                                                 <div class="d-grid px-4 pt-2 pb-1">
-                                                    <a class="btn btn-danger d-flex" href="login.html">
+                                                    <a class="btn btn-danger d-flex" href="#" id="logoutBtn">
                                                         <small class="align-middle">Logout</small>
                                                         <i class="ri ri-logout-box-r-line ms-2 ri-xs"></i>
                                                     </a>
@@ -307,28 +309,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-12">
-                                            <div class="card overflow-hidden">
-                                                <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                                    <h5 class="mb-0">Recent Emergency Reports</h5>
-                                                    <button class="btn btn-sm btn-primary" type="button" onclick="loadPage('reports')">View All</button>
-                                                </div>
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="text-truncate">Report ID</th>
-                                                                <th class="text-truncate">Category</th>
-                                                                <th class="text-truncate">Priority</th>
-                                                                <th class="text-truncate">Status</th>
-                                                                <th class="text-truncate">Created Date</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="dashboard-reports-table"></tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -416,6 +396,8 @@
             <script src="js/pages/notification.js"></script>
             <script src="js/pages/settings.js"></script>
             <script src="js/app.js"></script>
+            <!-- Logout JS -->
+            <script src="js/logout.js"></script>
             <!-- Place this tag before closing body tag for github widget button. -->
             <script async="async" defer="defer" src="https://buttons.github.io/buttons.js"></script>
         </body>

@@ -137,7 +137,6 @@ function renderDashboardWidgets() {
   setTextById('dashboard-active-emergencies', reportsData.filter(item => item.status !== 'Completed').length);
   setTextById('dashboard-all-members', usersData.length);
 
-  renderReportsTable('dashboard-reports-table', reportsData.slice(0, 5), true);
 }
 
 function triggerEmergencyAlert() {
