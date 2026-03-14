@@ -6,7 +6,7 @@ function initRealtimeUpdates() {
     collections.forEach(colName => {
         db.collection(colName).onSnapshot((snapshot) => {
             if (typeof fetchDashboardStats === "function") {
-                fetchDashboardStats(); 
+                fetchDashboardStats();
             }
 
             if (colName === 'emergency_reports' || colName === 'reports') {
@@ -29,26 +29,59 @@ function handleNewAlerts(snapshot, type) {
 }
 
 function triggerSweetEmergencyAlert(data, type) {
-    const audio = document.getElementById('sos-audio');
-    if (audio) audio.play().catch(e => console.log("Sound blocked"));
-
     const isSOS = (type === 'emergency_reports');
     
+    // Sound play
+    const audio = document.getElementById('sos-audio');
+    if (audio) audio.play().catch(e => console.warn("Sound blocked"));
+
+    // Coordinates check
+    let latitude = data.latitude ?? data.lat ?? (data.location ? data.location.latitude : null);
+    let longitude = data.longitude ?? data.lng ?? (data.location ? data.location.longitude : null);
+    const hasCoordinates = latitude != null && longitude != null;
+
+    let tableHtml = '<table style="width:100%; text-align:left; border-collapse:collapse; font-size:15px; margin-top:10px;">';
+    
+    if (data.categoryName || data.category) {
+        tableHtml += `<tr style="border-bottom: 1px solid #eee;"><td style="padding:10px 5px;"><b>Category</b></td><td style="padding:10px 5px;">${data.categoryName || data.category}</td></tr>`;
+    }
+
+    if (data.severity || data.priority) {
+        tableHtml += `<tr style="border-bottom: 1px solid #eee;"><td style="padding:10px 5px;"><b>Severity</b></td><td style="padding:10px 5px;"><span class="badge bg-danger">${data.severity || data.priority}</span></td></tr>`;
+    }
+
+    if (!isSOS && data.message && data.message !== "-") {
+        tableHtml += `<tr style="border-bottom: 1px solid #eee;"><td style="padding:10px 5px;"><b>Message</b></td><td style="padding:10px 5px;">${data.message}</td></tr>`;
+    }
+
+    if (data.address) {
+        tableHtml += `<tr><td style="padding:10px 5px;"><b>Location</b></td><td style="padding:10px 5px; font-style: italic; color: #666;">${data.address}</td></tr>`;
+    } else if (hasCoordinates) {
+        tableHtml += `<tr><td style="padding:10px 5px;"><b>Coordinates</b></td><td style="padding:10px 5px; color: #666;">${latitude.toFixed(4)}, ${longitude.toFixed(4)}</td></tr>`;
+    }
+
+    tableHtml += '</table>';
+
     Swal.fire({
         title: isSOS ? '🚨 SOS ALERT DETECTED!' : '📝 NEW EMERGENCY REPORT',
-        html: `<b>Category:</b> ${data.categoryName || 'General'}<br>
-               <b>Severity:</b> ${data.severity || 'High'}<br>
-               ${data.message ? `<b>Message:</b> ${data.message}<br>` : ''}
-               <b>Location:</b> ${data.address || 'Checking...'}`,
+        html: tableHtml,
         icon: isSOS ? 'warning' : 'info',
-        showCancelButton: true,
+        showConfirmButton: hasCoordinates,
         confirmButtonText: 'View on Map',
         confirmButtonColor: '#d33',
-        backdrop: `rgba(255, 0, 0, 0.2)`,
+        showDenyButton: true,
+        denyButtonText: 'Go to Reports',
+        denyButtonColor: '#696cff',
+        showCancelButton: true,
+        cancelButtonText: 'Close',
+        backdrop: isSOS ? 'rgba(255, 0, 0, 0.3)' : 'rgba(105, 108, 255, 0.1)',
         allowOutsideClick: false
     }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = `map.html?lat=${data.latitude}&lng=${data.longitude}`;
+        if (result.isConfirmed && hasCoordinates) {
+            window.location.href = `map.html?lat=${latitude}&lng=${longitude}`;
+        } else if (result.isDenied) {
+            if (typeof loadPage === 'function') loadPage(isSOS ? 'sos' : 'reports');
+            else window.location.href = isSOS ? 'sos.html' : 'reports.html';
         }
     });
 }
