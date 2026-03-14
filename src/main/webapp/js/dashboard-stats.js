@@ -20,7 +20,7 @@ function fetchDashboardStats() {
 
             document.getElementById('dashboard-total-reports').innerText = data.totalReports || 0;
             document.getElementById('dashboard-total-sos').innerText = data.totalSOS || 0;
-            document.getElementById('dashboard-active-emergencies').innerText = data.activeEmergency || 0;
+            document.getElementById('dashboard-today-reports').innerText = data.todayReports || 0;
             document.getElementById('dashboard-all-members').innerText = data.allMembers || 0;
 
             console.log("Stats updated successfully!");

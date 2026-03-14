@@ -8,8 +8,7 @@ import lk.iamlaky.config.FirebaseConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @WebServlet(name = "GetDashboardStats", urlPatterns = {"/get-stats"})
 public class GetDashboardStats extends HttpServlet {
@@ -21,14 +20,46 @@ public class GetDashboardStats extends HttpServlet {
         try {
             Firestore db = FirebaseConfig.getDb();
 
+            // 1. Basic Counts
             stats.put("totalReports", db.collection("reports").get().get().size());
-
             stats.put("totalSOS", db.collection("emergency_reports").get().get().size());
-
-            Query activeQuery = db.collection("emergency_reports").whereNotEqualTo("status", "Complete");
-            stats.put("activeEmergency", activeQuery.get().get().size());
-
             stats.put("allMembers", db.collection("users").get().get().size());
+
+            // 2. Today Reports ගණනය කිරීම (Collection දෙකෙන්ම)
+            int todayGrandTotal = 0;
+
+            // අද දවසේ ආරම්භය (Today 00:00:00)
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            Date todayStart = cal.getTime();
+
+            // පරීක්ෂා කළ යුතු Collection ලැයිස්තුව
+            List<String> collections = Arrays.asList("reports", "emergency_reports");
+
+            for (String colName : collections) {
+                ApiFuture<QuerySnapshot> future = db.collection(colName).get();
+                List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+                for (QueryDocumentSnapshot document : documents) {
+                    Object timeObj = document.get("timestamp");
+                    Date reportDate = null;
+
+                    if (timeObj instanceof com.google.cloud.Timestamp) {
+                        reportDate = ((com.google.cloud.Timestamp) timeObj).toDate();
+                    } else if (timeObj instanceof Long) {
+                        reportDate = new Date((Long) timeObj);
+                    }
+
+                    if (reportDate != null && reportDate.after(todayStart)) {
+                        todayGrandTotal++;
+                    }
+                }
+            }
+
+            stats.put("todayReports", todayGrandTotal);
 
             String json = new Gson().toJson(stats);
             resp.getWriter().write(json);
