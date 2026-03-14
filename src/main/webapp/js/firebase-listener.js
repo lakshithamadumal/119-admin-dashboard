@@ -1,3 +1,14 @@
+// Debounce: multiple rapid snapshot fires (e.g. page load) →  one single stats refresh
+let _statsDebounceTimer = null;
+function debouncedFetchStats() {
+    clearTimeout(_statsDebounceTimer);
+    _statsDebounceTimer = setTimeout(function () {
+        if (typeof fetchDashboardStats === "function") {
+            fetchDashboardStats();
+        }
+    }, 400);
+}
+
 function initRealtimeUpdates() {
     console.log("Global Listener Active...");
 
@@ -5,9 +16,7 @@ function initRealtimeUpdates() {
 
     collections.forEach(colName => {
         db.collection(colName).onSnapshot((snapshot) => {
-            if (typeof fetchDashboardStats === "function") {
-                fetchDashboardStats();
-            }
+            debouncedFetchStats();
 
             if (colName === 'emergency_reports' || colName === 'reports') {
                 handleNewAlerts(snapshot, colName);
