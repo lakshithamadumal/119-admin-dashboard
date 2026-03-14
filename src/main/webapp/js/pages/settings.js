@@ -24,9 +24,9 @@ async function saveSubscriptionPrice() {
   const amount = Number(document.getElementById('settings-subscription-price').value);
   try {
     await db.collection('app_settings').doc('subscription_config').update({ price: amount });
-    Swal.fire({ icon: 'success', title: 'Saved!', text: 'Subscription price updated.' });
+    Swal.fire({ icon: 'success', title: 'Saved!', text: 'Subscription price updated.', backdrop: 'rgba(105, 108, 255, 0.1)' });
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update price.' });
+    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update price.', backdrop: 'rgba(105, 108, 255, 0.1)' });
   }
 }
 
@@ -34,9 +34,9 @@ async function saveOperatorContactNumber() {
   const num = document.getElementById('settings-operator-contact').value;
   try {
     await db.collection('operators').doc('1').update({ number: num });
-    Swal.fire({ icon: 'success', title: 'Saved!', text: 'Operator contact updated.' });
+    Swal.fire({ icon: 'success', title: 'Saved!', text: 'Operator contact updated.', backdrop: 'rgba(105, 108, 255, 0.1)' });
   } catch (e) {
-    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update number.' });
+    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update number.', backdrop: 'rgba(105, 108, 255, 0.1)' });
   }
 }
 
