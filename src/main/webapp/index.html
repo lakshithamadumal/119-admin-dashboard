@@ -35,11 +35,18 @@
         <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
         <!--? Config: Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file. -->
         <script src="assets/js/config.js"></script>
+        <style>
+            .swal2-container {
+                z-index: 99999 !important;
+            }
+
+            .swal2-backdrop-show {
+                background: rgba(105, 108, 255, 0.1) !important;
+            }
+        </style>
     </head>
     <body>
-
         <audio id="sos-audio" src="assets/alert/emergency-sound.mp3" preload="auto"></audio>
-
         <!-- Layout wrapper -->
         <div class="layout-wrapper layout-content-navbar">
             <div class="layout-container">

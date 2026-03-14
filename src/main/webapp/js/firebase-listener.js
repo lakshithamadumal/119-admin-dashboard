@@ -39,7 +39,7 @@ function handleNewAlerts(snapshot, type) {
 
 function triggerSweetEmergencyAlert(data, type) {
     const isSOS = (type === 'emergency_reports');
-    
+
     // Sound play
     const audio = document.getElementById('sos-audio');
     if (audio) audio.play().catch(e => console.warn("Sound blocked"));
@@ -50,7 +50,7 @@ function triggerSweetEmergencyAlert(data, type) {
     const hasCoordinates = latitude != null && longitude != null;
 
     let tableHtml = '<table style="width:100%; text-align:left; border-collapse:collapse; font-size:15px; margin-top:10px;">';
-    
+
     if (data.categoryName || data.category) {
         tableHtml += `<tr style="border-bottom: 1px solid #eee;"><td style="padding:10px 5px;"><b>Category</b></td><td style="padding:10px 5px;">${data.categoryName || data.category}</td></tr>`;
     }
@@ -75,6 +75,7 @@ function triggerSweetEmergencyAlert(data, type) {
         title: isSOS ? '🚨 SOS ALERT DETECTED!' : '📝 NEW EMERGENCY REPORT',
         html: tableHtml,
         icon: isSOS ? 'warning' : 'info',
+        target: 'body',
         showConfirmButton: hasCoordinates,
         confirmButtonText: 'View on Map',
         confirmButtonColor: '#d33',
@@ -83,7 +84,7 @@ function triggerSweetEmergencyAlert(data, type) {
         denyButtonColor: '#696cff',
         showCancelButton: true,
         cancelButtonText: 'Close',
-        backdrop: isSOS ? 'rgba(105, 108, 255, 0.1)' : 'rgba(105, 108, 255, 0.1)',
+        backdrop: isSOS ? 'rgba(255, 0, 0, 0.4)' : 'rgba(105, 108, 255, 0.1)',
         allowOutsideClick: false
     }).then((result) => {
         if (result.isConfirmed && hasCoordinates) {
