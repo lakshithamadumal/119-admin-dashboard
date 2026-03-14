@@ -1,75 +1,52 @@
-/**
- * Settings page module.
- * Depends on: js/utils.js, js/data.js, js/pages/memberships.js, js/pages/payments.js
- */
+// js/pages/settings.js
 
-function showSettingsFeedback(elementId) {
-  const feedback = document.getElementById(elementId);
-  if (!feedback) {
-    return;
+async function loadSettings() {
+  const priceInput = document.getElementById('settings-subscription-price');
+  const operatorInput = document.getElementById('settings-operator-contact');
+
+  if (!priceInput || !operatorInput) return;
+
+  try {
+    console.log('Fetching settings from Firestore...');
+    const [subDoc, opDoc] = await Promise.all([
+      db.collection('app_settings').doc('subscription_config').get(),
+      db.collection('operators').doc('1').get()
+    ]);
+
+    if (subDoc.exists) priceInput.value = subDoc.data().price || 0;
+    if (opDoc.exists) operatorInput.value = opDoc.data().number || '';
+  } catch (error) {
+    console.error('Error loading settings:', error);
   }
-
-  feedback.classList.remove('d-none');
-  setTimeout(() => feedback.classList.add('d-none'), 2500);
 }
 
-function saveSubscriptionPrice() {
-  const input = document.getElementById('settings-subscription-price');
-  if (!input) {
-    return;
+async function saveSubscriptionPrice() {
+  const amount = Number(document.getElementById('settings-subscription-price').value);
+  try {
+    await db.collection('app_settings').doc('subscription_config').update({ price: amount });
+    Swal.fire({ icon: 'success', title: 'Saved!', text: 'Subscription price updated.' });
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update price.' });
   }
-
-  const amount = Number(input.value);
-  if (!Number.isFinite(amount) || amount <= 0) {
-    alert('Please enter a valid subscription price in LKR.');
-    return;
-  }
-
-  appSettings.subscriptionPriceLkr = amount;
-  applySubscriptionPriceAcrossData(amount);
-  saveAppSettings();
-
-  renderMembershipsTable('memberships-table-body', membershipsData);
-  renderPaymentsTable('payments-table-body', paymentsData);
-  showSettingsFeedback('settings-subscription-feedback');
 }
 
-function saveOperatorContactNumber() {
-  const input = document.getElementById('settings-operator-contact');
-  if (!input) {
-    return;
+async function saveOperatorContactNumber() {
+  const num = document.getElementById('settings-operator-contact').value;
+  try {
+    await db.collection('operators').doc('1').update({ number: num });
+    Swal.fire({ icon: 'success', title: 'Saved!', text: 'Operator contact updated.' });
+  } catch (e) {
+    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update number.' });
   }
-
-  const operatorContactNumber = input.value.trim();
-  if (!operatorContactNumber) {
-    alert('Please enter an operator contact number.');
-    return;
-  }
-
-  appSettings.operatorContactNumber = operatorContactNumber;
-  saveAppSettings();
-  showSettingsFeedback('settings-contact-feedback');
 }
 
 function initializeSettingsModule() {
-  const priceInput = document.getElementById('settings-subscription-price');
-  const operatorInput = document.getElementById('settings-operator-contact');
-  const saveSubscriptionButton = document.getElementById('settings-save-subscription');
-  const saveContactButton = document.getElementById('settings-save-contact');
+  console.log("Settings module initialized!");
+  const btnPrice = document.getElementById('settings-save-subscription');
+  const btnContact = document.getElementById('settings-save-contact');
 
-  if (priceInput) {
-    priceInput.value = String(appSettings.subscriptionPriceLkr);
-  }
+  if (btnPrice) btnPrice.onclick = saveSubscriptionPrice;
+  if (btnContact) btnContact.onclick = saveOperatorContactNumber;
 
-  if (operatorInput) {
-    operatorInput.value = appSettings.operatorContactNumber;
-  }
-
-  if (saveSubscriptionButton) {
-    saveSubscriptionButton.addEventListener('click', saveSubscriptionPrice);
-  }
-
-  if (saveContactButton) {
-    saveContactButton.addEventListener('click', saveOperatorContactNumber);
-  }
+  loadSettings();
 }
