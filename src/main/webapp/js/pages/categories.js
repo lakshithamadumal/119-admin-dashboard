@@ -28,10 +28,15 @@
                             <img src="${cat.imageUrl}" alt="${cat.name}" class="rounded border" style="width: 40px; height: 40px; object-fit: cover;">
                         </td>
                         <td><span class="badge bg-label-info">0</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-warning me-1" onclick="openEditCategoryModal('${docId}', '${cat.name}')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="openDeleteCategoryModal('${docId}', '${cat.name}')">Delete</button>
-                        </td>
+                      <td>
+                          <button class="btn btn-sm btn-warning me-1" onclick="openEditCategoryModal('${docId}', '${cat.name}')">
+                              <i class="bi bi-pencil-square"></i>
+                          </button>
+
+                          <button class="btn btn-sm btn-danger" onclick="openDeleteCategoryModal('${docId}', '${cat.name}')">
+                              <i class="bi bi-trash"></i>
+                          </button>
+                      </td>
                     </tr>`;
             });
         } catch (error) {
