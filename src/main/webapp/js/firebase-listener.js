@@ -9,16 +9,25 @@ function debouncedFetchStats() {
     }, 400);
 }
 
+let isInitialLoad = true;
+
 function initRealtimeUpdates() {
     console.log("Global Listener Active...");
 
-    const collections = ['emergency_reports', 'reports', 'users', 'operators', 'admins', 'categories', 'notifications', 'app_settings'];
+    const collections = ['emergency_reports', 'reports'];
 
     collections.forEach(colName => {
         db.collection(colName).onSnapshot((snapshot) => {
-            debouncedFetchStats();
+            
+            if (isInitialLoad) {
+                isInitialLoad = false;
+                return;
+            }
 
-            if (colName === 'emergency_reports' || colName === 'reports') {
+            let hasNewDoc = snapshot.docChanges().some(change => change.type === "added");
+
+            if (hasNewDoc) {
+                debouncedFetchStats();
                 handleNewAlerts(snapshot, colName);
             }
         });
