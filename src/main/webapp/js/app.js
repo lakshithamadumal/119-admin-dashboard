@@ -95,8 +95,10 @@ function initializePageScripts(pageName) {
       initializeReportsModule();
       break;
     case 'users':
-      renderUsersTable('users-table-body', usersData);
-      break;
+    if (typeof initializeUsersModule === 'function') {
+        initializeUsersModule();
+    }
+    break;
     case 'categories':
     if (typeof initializeCategoriesModule === 'function') {
         initializeCategoriesModule();

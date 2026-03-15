@@ -1,109 +1,88 @@
-/**
- * Users page module.
- * Depends on: js/utils.js, js/data.js
- */
+async function fetchUsers() {
+    const tbody = document.getElementById('users-table-body');
+    if (!tbody) return;
 
-function renderUsersTable(targetId, data) {
-  const tableBody = document.getElementById(targetId);
-  if (!tableBody) {
-    return;
-  }
+    try {
+        console.log("Fetching users from Firestore...");
+        const snapshot = await db.collection('users').get();
+        tbody.innerHTML = '';
 
-  if (!data.length) {
-    tableBody.innerHTML = buildEmptyTableRow(7, 'No users available. Load user data into js/data.js or your API response first.');
-    return;
-  }
+        if (snapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No users found.</td></tr>';
+            return;
+        }
 
-  tableBody.innerHTML = data.map(user => `
-    <tr>
-      <td>${user.id}</td>
-      <td>${user.name}</td>
-      <td>${user.email}</td>
-      <td>${user.phone}</td>
-      <td>${buildBadge(user.membershipStatus, badgeFromStatus(user.membershipStatus))}</td>
-      <td>${user.createdDate}</td>
-      <td><button class="btn btn-sm btn-info" onclick="openUserModal('${user.id}')">More Details</button></td>
-    </tr>
-  `).join('');
+        snapshot.forEach(doc => {
+            const user = doc.data();
+            const docId = doc.id;
+
+            const statusBadge = user.paymentStatus === 'Active' ? 'success' : 'danger';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phoneNumber}</td>
+                    <td><span class="badge bg-label-${statusBadge}">${user.paymentStatus || 'Inactive'}</span></td>
+                    <td>${user.totalReports || 0} Reports</td>
+                    <td><button class="btn btn-sm btn-info" onclick="openUserModal('${docId}')">More Details</button></td>
+                </tr>`;
+        });
+    } catch (error) {
+        console.error("Error loading users:", error);
+    }
 }
 
-function openUserModal(userId) {
-  const user = usersData.find(item => item.id === userId);
-  if (!user) {
-    return;
-  }
+async function openUserModal(uid) {
+    try {
+        const doc = await db.collection('users').doc(uid).get();
+        if (!doc.exists) return;
 
-  const membership = membershipsData.find(item => item.userId === userId);
-  const payment = getLatestPaymentForUser(userId);
-  const medical = medicalInfoData.find(item => item.userId === userId);
-  const userReports = reportsData.filter(item => item.userId === userId);
+        const user = doc.data();
 
-  // Populate user account information
-  setTextById('modal-user-id', user.id);
-  setTextById('modal-user-name', user.name);
-  setTextById('modal-user-email', user.email);
-  setTextById('modal-user-phone', user.phone);
-  setTextById('modal-user-nic', user.nic || '-');
-  setTextById('modal-user-registered', user.createdDate || '-');
-  setTextById('modal-user-address', user.address || '-');
+        document.getElementById('modal-user-id').value = user.uid || uid;
+        document.getElementById('modal-user-name').value = user.name || '-';
+        document.getElementById('modal-user-email').value = user.email || '-';
+        document.getElementById('modal-user-phone').value = user.phoneNumber || '-';
+        document.getElementById('modal-user-nic').value = user.nicNumber || '-';
+        document.getElementById('modal-user-address').value = user.address || '-';
+        document.getElementById('modal-user-registered').value = "Registered User"; 
 
-  // Populate medical information
-  setTextById('modal-medical-blood', medical ? medical.bloodGroup : '-');
-  setTextById('modal-medical-allergies', medical ? medical.allergies : '-');
-  setTextById('modal-medical-conditions', medical ? medical.conditions : '-');
-  setTextById('modal-medical-medications', medical ? (medical.currentMedications || '-') : '-');
+        document.getElementById('modal-medical-blood').value = user.bloodGroup || '-';
+        document.getElementById('modal-medical-allergies').value = user.allergies || '-';
+        document.getElementById('modal-medical-conditions').value = user.medicalConditions || '-';
+        document.getElementById('modal-medical-medications').value = user.currentMedications || '-';
 
-  // Populate membership information
-  const subscriptionStatus = membership ? membership.status : (payment ? payment.status : 'No Active Membership');
-  const subscriptionExpiry = membership ? membership.expireDate : '-';
-  setTextById('modal-subscription-status', subscriptionStatus);
-  setTextById('modal-subscription-expiry', subscriptionExpiry);
+        document.getElementById('modal-subscription-status').value = user.paymentStatus || 'Inactive';
+        
+        if (user.expiryDate) {
+            const date = new Date(user.expiryDate);
+            document.getElementById('modal-subscription-expiry').value = date.toLocaleDateString();
+        } else {
+            document.getElementById('modal-subscription-expiry').value = '-';
+        }
 
-  // Populate emergency contacts
-  setTextById('modal-ec1-name', medical ? (medical.emergencyContact1Name || '-') : '-');
-  setTextById('modal-ec1-phone', medical ? (medical.emergencyContact1Phone || '-') : '-');
-  setTextById('modal-ec2-name', medical ? (medical.emergencyContact2Name || '-') : '-');
-  setTextById('modal-ec2-phone', medical ? (medical.emergencyContact2Phone || '-') : '-');
+        document.getElementById('modal-ec1-name').value = user.emergencyNick1 || 'Contact 1';
+        document.getElementById('modal-ec1-phone').value = user.emergencyContact1 || '-';
+        document.getElementById('modal-ec2-name').value = user.emergencyNick2 || 'Contact 2';
+        document.getElementById('modal-ec2-phone').value = user.emergencyContact2 || '-';
 
-  // Populate media section with first available report image for this user
-  const mediaImageContainer = document.getElementById('modal-media-image');
-  if (mediaImageContainer) {
-    const userReportIds = userReports.map(item => item.reportId);
-    const userMedia = reportMediaData.find(item => userReportIds.includes(item.reportId) && item.image);
-    if (userMedia && userMedia.image) {
-      mediaImageContainer.innerHTML = `<img src="${userMedia.image}" alt="User report image" class="img-fluid rounded">`;
-    } else {
-      mediaImageContainer.textContent = 'No image uploaded';
+        const mediaContainer = document.getElementById('modal-media-image');
+        if (user.profilePicUrl) {
+            mediaContainer.innerHTML = `<img src="${user.profilePicUrl}" alt="Profile Pic" class="img-fluid rounded border" style="max-width: 150px;">`;
+        } else {
+            mediaContainer.textContent = 'No image uploaded';
+        }
+
+        const userModal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
+        userModal.show();
+
+    } catch (error) {
+        console.error("Error fetching user details:", error);
+        Swal.fire('Error', 'Could not load user details', 'error');
     }
-  }
+}
 
-  // Populate user's reports
-  const reportList = document.getElementById('modal-user-reports-list');
-  const reportCount = document.getElementById('modal-user-report-count');
-
-  if (reportList) {
-    if (userReports.length === 0) {
-      reportList.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No reports created by this user</td></tr>';
-    } else {
-      reportList.innerHTML = userReports.map(report => `
-        <tr>
-          <td>${report.reportId}</td>
-          <td>${report.category}</td>
-          <td>${buildBadge(report.priority, badgeFromPriority(report.priority))}</td>
-          <td>${buildBadge(report.status, badgeFromReportStatus(report.status))}</td>
-          <td>${report.createdDate}</td>
-        </tr>
-      `).join('');
-    }
-  }
-
-  if (reportCount) {
-    reportCount.textContent = userReports.length;
-  }
-
-  const modalElement = document.getElementById('userDetailsModal');
-  if (modalElement) {
-    const modalInstance = new bootstrap.Modal(modalElement);
-    modalInstance.show();
-  }
+function initializeUsersModule() {
+    fetchUsers();
 }
