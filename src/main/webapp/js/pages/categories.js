@@ -12,7 +12,7 @@
             tbody.innerHTML = '';
 
             if (snapshot.empty) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No categories found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No categories found.</td></tr>';
                 return;
             }
 
@@ -27,7 +27,6 @@
                         <td>
                             <img src="${cat.imageUrl}" alt="${cat.name}" class="rounded border" style="width: 40px; height: 40px; object-fit: cover;">
                         </td>
-                        <td><span class="badge bg-label-info">0</span></td>
                       <td>
                           <button class="btn btn-sm btn-warning me-1" onclick="openEditCategoryModal('${docId}', '${cat.name}')">
                               <i class="bi bi-pencil-square"></i>
