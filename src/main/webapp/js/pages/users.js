@@ -20,6 +20,7 @@ async function fetchUsers() {
 
             tbody.innerHTML += `
                 <tr>
+                    <td>${user.uid}</td>
                     <td>${user.name}</td>
                     <td>${user.email}</td>
                     <td>${user.phoneNumber}</td>
