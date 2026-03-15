@@ -98,8 +98,9 @@ function initializePageScripts(pageName) {
       renderUsersTable('users-table-body', usersData);
       break;
     case 'categories':
-      renderCategoriesTable('categories-table-body', categoriesData);
-      initializeCategoriesModule();
+    if (typeof initializeCategoriesModule === 'function') {
+        initializeCategoriesModule();
+    }
       break;
     case 'notification':
       initializeNotificationModule();

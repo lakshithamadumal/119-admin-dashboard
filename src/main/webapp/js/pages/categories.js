@@ -1,206 +1,141 @@
-/**
- * Categories page module.
- * Depends on: js/utils.js, js/data.js
- */
+{
 
-function renderCategoriesTable(targetId, data) {
-  const tableBody = document.getElementById(targetId);
-  if (!tableBody) {
-    return;
-  }
+    let activeCategoryId = null; 
 
-  if (!data.length) {
-    tableBody.innerHTML = buildEmptyTableRow(5, 'No categories available. Add category data in js/data.js or load it from your API.');
-    return;
-  }
+    window.fetchCategories = async function() {
+        const tbody = document.getElementById('categories-table-body');
+        if (!tbody) return;
 
-  tableBody.innerHTML = data.map(category => {
-    const reportCount = reportsData.filter(r => r.categoryId === category.id).length;
+        try {
+            console.log("Fetching categories...");
+            const snapshot = await db.collection('categories').get();
+            tbody.innerHTML = '';
 
-    return `
-      <tr>
-        <td>${category.id}</td>
-        <td>${category.name}</td>
-        <td>
-          <img
-            src="${category.icon || createCategoryIconPlaceholder(category.name, '#64748b')}"
-            alt="${category.name} icon"
-            class="rounded border"
-            style="width: 40px; height: 40px; object-fit: cover;"
-          >
-        </td>
-        <td><span class="badge bg-label-info">${reportCount}</span></td>
-        <td>
-          <button class="btn btn-sm btn-warning me-1" onclick="openEditCategoryModal(${category.id})">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="openDeleteCategoryModal(${category.id})">Delete</button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
+            if (snapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No categories found.</td></tr>';
+                return;
+            }
 
-function initializeCategoriesModule() {
-  const iconInput = document.getElementById('modal-category-icon');
-  if (!iconInput || iconInput.dataset.bound === 'true') {
-    return;
-  }
+            snapshot.forEach(doc => {
+                const cat = doc.data();
+                const docId = doc.id;
 
-  iconInput.addEventListener('change', handleCategoryIconUpload);
-  iconInput.dataset.bound = 'true';
-}
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${cat.categoryId || docId}</td>
+                        <td>${cat.name}</td>
+                        <td>
+                            <img src="${cat.imageUrl}" alt="${cat.name}" class="rounded border" style="width: 40px; height: 40px; object-fit: cover;">
+                        </td>
+                        <td><span class="badge bg-label-info">0</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning me-1" onclick="openEditCategoryModal('${docId}', '${cat.name}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="openDeleteCategoryModal('${docId}', '${cat.name}')">Delete</button>
+                        </td>
+                    </tr>`;
+            });
+        } catch (error) {
+            console.error("Error loading categories:", error);
+        }
+    };
 
-function handleCategoryIconUpload(event) {
-  const [file] = event.target.files || [];
-  if (!file) {
-    return;
-  }
+    window.uploadToImgBB = async function(file) {
+        const API_KEY = "a3c8d35257779a06bdc4b306d992a25a";
+        const formData = new FormData();
+        formData.append("key", API_KEY);
+        formData.append("image", file);
 
-  if (!file.type.startsWith('image/')) {
-    alert('Please upload a valid image file.');
-    event.target.value = '';
-    return;
-  }
+        const response = await fetch("https://api.imgbb.com/1/upload", {
+            method: "POST",
+            body: formData
+        });
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    activeCategoryIcon = typeof reader.result === 'string' ? reader.result : '';
-    updateCategoryIconPreview(activeCategoryIcon);
-  };
-  reader.readAsDataURL(file);
-}
+        const result = await response.json();
+        if (result.success) return result.data.url;
+        else throw new Error("ImgBB Upload Failed");
+    };
 
-function updateCategoryIconPreview(iconValue) {
-  const previewWrap = document.getElementById('modal-category-icon-preview-wrap');
-  const previewImage = document.getElementById('modal-category-icon-preview');
-  if (!previewWrap || !previewImage) {
-    return;
-  }
+    window.saveCategoryModal = async function() {
+        const name = document.getElementById('modal-category-name').value.trim();
+        const iconInput = document.getElementById('modal-category-icon');
+        const saveBtn = document.querySelector('button[onclick="saveCategoryModal()"]');
 
-  if (iconValue) {
-    previewImage.src = iconValue;
-    previewWrap.classList.remove('d-none');
-  } else {
-    previewImage.src = '';
-    previewWrap.classList.add('d-none');
-  }
-}
+        if (!name) return alert("Please enter a name");
 
-function openAddCategoryModal() {
-  activeCategoryId = null;
-  activeCategoryIcon = '';
-  document.getElementById('categoryModalTitle').textContent = 'Add Category';
-  document.getElementById('modal-category-name').value = '';
-  document.getElementById('modal-category-icon').value = '';
-  updateCategoryIconPreview('');
+        try {
+            saveBtn.disabled = true;
+            saveBtn.innerText = "Saving...";
 
-  const modalElement = document.getElementById('categoryModal');
-  if (modalElement) {
-    const modalInstance = new bootstrap.Modal(modalElement);
-    modalInstance.show();
-  }
-}
+            if (activeCategoryId) {
+                let updateData = { name: name };
+                if (iconInput.files.length > 0) {
+                    const url = await uploadToImgBB(iconInput.files[0]);
+                    updateData.imageUrl = url;
+                }
+                await db.collection('categories').doc(activeCategoryId).update(updateData);
+            } else {
+                if (iconInput.files.length === 0) return alert("Please select an icon");
+                const url = await uploadToImgBB(iconInput.files[0]);
+                const newDocRef = db.collection('categories').doc();
+                await newDocRef.set({
+                    categoryId: newDocRef.id,
+                    name: name,
+                    imageUrl: url,
+                    isSelected: false
+                });
+            }
 
-function openEditCategoryModal(categoryId) {
-  const category = categoriesData.find(item => item.id === categoryId);
-  if (!category) {
-    return;
-  }
+            const modalEl = document.getElementById('categoryModal');
+            bootstrap.Modal.getInstance(modalEl).hide();
+            fetchCategories();
+            Swal.fire('Success', 'Category saved', 'success');
+        } catch (error) {
+            console.error(error);
+            Swal.fire('Error', 'Something went wrong', 'error');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerText = "Save Category";
+        }
+    };
 
-  activeCategoryId = categoryId;
-  activeCategoryIcon = category.icon || '';
-  document.getElementById('categoryModalTitle').textContent = 'Edit Category';
-  document.getElementById('modal-category-name').value = category.name;
-  document.getElementById('modal-category-icon').value = '';
-  updateCategoryIconPreview(activeCategoryIcon);
+    window.openAddCategoryModal = function() {
+        activeCategoryId = null;
+        document.getElementById('categoryModalTitle').innerText = "Add Category";
+        document.getElementById('modal-category-name').value = "";
+        document.getElementById('modal-category-icon').value = "";
+        new bootstrap.Modal(document.getElementById('categoryModal')).show();
+    };
 
-  const modalElement = document.getElementById('categoryModal');
-  if (modalElement) {
-    const modalInstance = new bootstrap.Modal(modalElement);
-    modalInstance.show();
-  }
-}
+    window.openEditCategoryModal = function(id, name) {
+        activeCategoryId = id;
+        document.getElementById('categoryModalTitle').innerText = "Edit Category";
+        document.getElementById('modal-category-name').value = name;
+        document.getElementById('modal-category-icon').value = "";
+        new bootstrap.Modal(document.getElementById('categoryModal')).show();
+    };
 
-function saveCategoryModal() {
-  const name = document.getElementById('modal-category-name').value.trim();
-  const icon = activeCategoryIcon;
+    window.openDeleteCategoryModal = function(id, name) {
+        activeCategoryId = id;
+        Swal.fire({
+            title: 'Delete Category?',
+            text: `Are you sure you want to delete "${name}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Yes, Delete'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                db.collection('categories').doc(id).delete().then(() => {
+                    fetchCategories();
+                    Swal.fire('Deleted', 'Category removed', 'success');
+                });
+            }
+        });
+    };
 
-  if (!name) {
-    alert('Please enter a category name');
-    return;
-  }
+    window.initializeCategoriesModule = function() {
+        console.log("Categories Module Initializing...");
+        fetchCategories();
+    };
 
-  if (!icon) {
-    alert('Please upload a category icon');
-    return;
-  }
-
-  if (activeCategoryId) {
-    const category = categoriesData.find(item => item.id === activeCategoryId);
-    if (category) {
-      category.name = name;
-      category.icon = icon;
-    }
-  } else {
-    const newId = categoriesData.length
-      ? Math.max(...categoriesData.map(item => item.id)) + 1
-      : 1;
-    const today = new Date().toISOString().split('T')[0];
-
-    categoriesData.push({
-      id: newId,
-      name: name,
-      icon: icon,
-      status: 'Active',
-      createdDate: today
-    });
-  }
-
-  renderCategoriesTable('categories-table-body', categoriesData);
-
-  const modalElement = document.getElementById('categoryModal');
-  if (modalElement) {
-    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-    if (modalInstance) {
-      modalInstance.hide();
-    }
-  }
-}
-
-function openDeleteCategoryModal(categoryId) {
-  const category = categoriesData.find(item => item.id === categoryId);
-  if (!category) {
-    return;
-  }
-
-  activeCategoryId = categoryId;
-  document.getElementById('delete-confirm-message').textContent = `Are you sure you want to delete the "${category.name}" category?`;
-
-  const modalElement = document.getElementById('deleteConfirmModal');
-  if (modalElement) {
-    const modalInstance = new bootstrap.Modal(modalElement);
-    modalInstance.show();
-  }
-}
-
-function confirmDeleteCategory() {
-  if (!activeCategoryId) {
-    return;
-  }
-
-  const categoryIndex = categoriesData.findIndex(item => item.id === activeCategoryId);
-  if (categoryIndex !== -1) {
-    categoriesData.splice(categoryIndex, 1);
-  }
-
-  renderCategoriesTable('categories-table-body', categoriesData);
-
-  const modalElement = document.getElementById('deleteConfirmModal');
-  if (modalElement) {
-    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-    if (modalInstance) {
-      modalInstance.hide();
-    }
-  }
-
-  activeCategoryId = null;
 }
