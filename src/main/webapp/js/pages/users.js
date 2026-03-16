@@ -1,36 +1,90 @@
+let usersRows = [];
+let activeUserSearch = '';
+
+function escapeUserText(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function renderUsersTable() {
+    const tbody = document.getElementById('users-table-body');
+    if (!tbody) return;
+
+    if (usersRows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-body-secondary py-4">No users found.</td></tr>';
+        return;
+    }
+
+    const term = activeUserSearch.trim().toLowerCase();
+    const filteredRows = term
+        ? usersRows.filter((item) => item.name.toLowerCase().includes(term))
+        : usersRows;
+
+    if (filteredRows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-body-secondary py-4">No users found for the entered name.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filteredRows.map((item) => `
+        <tr>
+            <td>${escapeUserText(item.uid)}</td>
+            <td>${escapeUserText(item.name)}</td>
+            <td>${escapeUserText(item.email)}</td>
+            <td>${escapeUserText(item.phoneNumber)}</td>
+            <td><span class="badge bg-label-${item.statusBadge}">${escapeUserText(item.paymentStatus)}</span></td>
+            <td>${escapeUserText(item.totalReportsLabel)}</td>
+            <td><button class="btn btn-sm btn-info" onclick="openUserModal('${escapeUserText(item.docId)}')">More Details</button></td>
+        </tr>
+    `).join('');
+}
+
+function attachUserSearchHandler() {
+    const searchInput = document.getElementById('search-users');
+    if (!searchInput) return;
+
+    searchInput.oninput = () => {
+        activeUserSearch = String(searchInput.value || '');
+        renderUsersTable();
+    };
+}
+
 async function fetchUsers() {
     const tbody = document.getElementById('users-table-body');
     if (!tbody) return;
 
     try {
-        console.log("Fetching users from Firestore...");
-        const snapshot = await db.collection('users').get();
-        tbody.innerHTML = '';
-
-        if (snapshot.empty) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No users found.</td></tr>';
+        if (typeof db === 'undefined') {
+            console.error('Firestore db is not initialized yet.');
             return;
         }
 
-        snapshot.forEach(doc => {
+        console.log('Fetching users from Firestore...');
+        const snapshot = await db.collection('users').get();
+
+        usersRows = snapshot.docs.map((doc) => {
             const user = doc.data();
             const docId = doc.id;
+            const paymentStatus = user.paymentStatus || 'Inactive';
 
-            const statusBadge = user.paymentStatus === 'Active' ? 'success' : 'danger';
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>${user.uid}</td>
-                    <td>${user.name}</td>
-                    <td>${user.email}</td>
-                    <td>${user.phoneNumber}</td>
-                    <td><span class="badge bg-label-${statusBadge}">${user.paymentStatus || 'Inactive'}</span></td>
-                    <td>${user.totalReports || 0} Reports</td>
-                    <td><button class="btn btn-sm btn-info" onclick="openUserModal('${docId}')">More Details</button></td>
-                </tr>`;
+            return {
+                docId,
+                uid: user.uid || '-',
+                name: user.name || '-',
+                email: user.email || '-',
+                phoneNumber: user.phoneNumber || '-',
+                paymentStatus,
+                statusBadge: paymentStatus === 'Active' ? 'success' : 'danger',
+                totalReportsLabel: `${user.totalReports || 0} Reports`
+            };
         });
+
+        renderUsersTable();
     } catch (error) {
-        console.error("Error loading users:", error);
+        console.error('Error loading users:', error);
     }
 }
 
@@ -85,5 +139,6 @@ async function openUserModal(uid) {
 }
 
 function initializeUsersModule() {
+    attachUserSearchHandler();
     fetchUsers();
 }
