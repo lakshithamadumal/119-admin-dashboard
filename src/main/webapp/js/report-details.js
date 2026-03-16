@@ -238,25 +238,35 @@ function detailCopyLocation() {
 function updateStatusTimelineUI(currentStatus, history) {
     const steps = STATUS_FLOW;
     const currentIdx = steps.indexOf(currentStatus);
+    const stepColors = {
+        Received: '#7367f0',
+        Assigned: '#facc15',
+        'In Progress': '#f97316',
+        Completed: '#22c55e'
+    };
 
     steps.forEach((step, idx) => {
         const stepKey = step.toLowerCase().replace(/\s/g, '');
         const dot = document.getElementById(`sdot-${stepKey}`);
         const line = document.getElementById(`sline-${stepKey}`);
         const timeEl = document.getElementById(`stime-${stepKey}`);
+        const activeColor = stepColors[step] || '#7367f0';
 
         if (dot) {
             if (idx <= currentIdx) {
-                dot.style.background = "#7367f0";
+                dot.style.background = activeColor;
                 dot.style.color = "#fff";
-                dot.style.borderColor = "#7367f0";
+                dot.style.borderColor = activeColor;
             } else {
                 dot.style.background = "#f0f0f0";
                 dot.style.color = "#adb5bd";
+                dot.style.borderColor = "#dee2e6";
             }
         }
         if (line) {
-            line.style.background = idx < currentIdx ? "#7367f0" : "#dee2e6";
+            const nextStep = steps[idx + 1];
+            const nextColor = stepColors[nextStep] || '#7367f0';
+            line.style.background = idx < currentIdx ? nextColor : "#dee2e6";
         }
         if (timeEl) timeEl.textContent = history[step] || '-';
     });
