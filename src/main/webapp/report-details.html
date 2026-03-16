@@ -21,6 +21,27 @@
         <link rel="stylesheet" href="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css">
         <script src="assets/vendor/js/helpers.js"></script>
         <script src="assets/js/config.js"></script>
+        <style>
+            .btn-orange {
+    background-color: #fd7e14;
+    color: #fff;
+    border: none;
+}
+
+.btn-orange:hover {
+    background-color: #e96b0c;
+    color: #fff;
+}
+
+/* Disabled state */
+.btn-orange:disabled,
+.btn-orange.disabled {
+    background-color: #f5b98a;
+    color: #ffffff;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+        </style>
     </head>
     <body>
         <div class="layout-wrapper layout-content-navbar">
@@ -281,9 +302,9 @@
                                             <hr class="my-3">
                                             <p class="text-body-secondary small mb-2">Change status:</p>
                                             <div class="d-flex gap-2 flex-wrap">
-                                                <button class="btn btn-sm btn-outline-info" id="status-btn-assigned" onclick="setReportStatus('Assigned')">Assigned</button>
-                                                <button class="btn btn-sm btn-outline-warning" id="status-btn-inprogress" onclick="setReportStatus('In Progress')">In Process</button>
-                                                <button class="btn btn-sm btn-outline-success" id="status-btn-completed" onclick="setReportStatus('Completed')">Complete</button>
+                                                <button class="btn btn-sm btn-warning" id="status-btn-assigned" onclick="setReportStatus('Assigned')">Assigned</button>
+                                                <button class="btn btn-sm btn-orange" id="status-btn-inprogress" onclick="setReportStatus('In Progress')">In Progress</button>
+                                                <button class="btn btn-sm btn-success" id="status-btn-completed" onclick="setReportStatus('Completed')">Completed</button>
                                             </div>
                                         </div>
                                     </div>
