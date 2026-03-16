@@ -127,7 +127,9 @@ function badgeFromNotificationType(type) {
     SYSTEM: 'primary',
     PROMO: 'success',
     SOS: 'danger',
-    REPORT: 'warning'
+    SOS_ALERT: 'danger',
+    REPORT: 'warning',
+    REPORT_DELETED: 'secondary'
   };
   return map[type] || 'secondary';
 }

@@ -1,29 +1,70 @@
 /**
  * Notification page module.
- * Depends on: js/utils.js, js/data.js
+ * Depends on: js/utils.js, js/firebase-config.js
  */
 
-function renderNotificationsList(targetId, data) {
-  const list = document.getElementById(targetId);
-  if (!list) {
+let allNotificationsData = [];
+
+function parseTimestampLabel(value) {
+  if (value === undefined || value === null) return '-';
+  const ms = typeof value === 'number'
+    ? value
+    : (typeof value.toMillis === 'function' ? value.toMillis() : Number(value));
+  const d = new Date(ms);
+  return isNaN(d.getTime()) ? '-' : d.toLocaleString();
+}
+
+async function loadNotificationsFromFirestore() {
+  const tableBody = document.getElementById('notifications-table-body');
+  if (tableBody) {
+    tableBody.innerHTML = buildEmptyTableRow(6, 'Loading notifications...');
+  }
+
+  if (typeof db === 'undefined') {
+    console.error('Firestore is not initialized.');
+    if (tableBody) tableBody.innerHTML = buildEmptyTableRow(6, 'Unable to connect to database.');
     return;
   }
 
-  if (!data.length) {
-    list.innerHTML = '<li class="text-body-secondary">No notifications available.</li>';
-    return;
-  }
+  try {
+    const snapshot = await db.collection('notifications').orderBy('timestamp', 'desc').get();
+    const rawNotifications = [];
+    const uniqueUserIds = new Set();
 
-  list.innerHTML = data.map(notification => `
-    <li class="d-flex align-items-start mb-4">
-      <span class="badge bg-label-${badgeFromPriority(notification.level)} me-3">${escapeHtml(notification.level)}</span>
-      <div>
-        <h6 class="mb-1">${escapeHtml(notification.title)}</h6>
-        <p class="mb-0 text-body-secondary">${escapeHtml(notification.description || notification.detail || '-')}</p>
-        <small class="text-body-secondary">${escapeHtml(notification.timestamp || notification.time || '-')}</small>
-      </div>
-    </li>
-  `).join('');
+    snapshot.forEach(doc => {
+      const data = doc.data() || {};
+      rawNotifications.push({ docId: doc.id, data });
+      if (data.userId && data.userId !== 'ALL') {
+        uniqueUserIds.add(data.userId);
+      }
+    });
+
+    // Fetch user uid labels in parallel
+    const uidMap = {};
+    await Promise.all([...uniqueUserIds].map(async authUid => {
+      try {
+        const userDoc = await db.collection('users').doc(authUid).get();
+        if (userDoc.exists) {
+          const ud = userDoc.data() || {};
+          uidMap[authUid] = ud.uid || authUid;
+        }
+      } catch (_) { /* keep raw authUid on error */ }
+    }));
+
+    allNotificationsData = rawNotifications.map(({ docId, data }) => ({
+      id: data.id || docId,
+      userId: data.userId ? (uidMap[data.userId] || data.userId) : '-',
+      title: data.title || '-',
+      type: data.type || '-',
+      description: data.description || '-',
+      timestamp: parseTimestampLabel(data.timestamp)
+    }));
+
+    applyNotificationFilters();
+  } catch (err) {
+    console.error('Failed to load notifications:', err);
+    if (tableBody) tableBody.innerHTML = buildEmptyTableRow(6, 'Failed to load notifications.');
+  }
 }
 
 function renderNotificationsTable(targetId, data) {
@@ -53,126 +94,79 @@ function renderNotificationsTable(targetId, data) {
   `).join('');
 }
 
-function populateNotificationUserOptions() {
-  const notificationUserSelect = document.getElementById('notification-user-id');
-  const notificationUserFilter = document.getElementById('notification-user-filter');
-  const userOptions = usersData.map(user => `<option value="${user.id}">${user.id} - ${escapeHtml(user.name)}</option>`).join('');
-
-  if (notificationUserSelect) {
-    notificationUserSelect.innerHTML = `
-      <option value="ALL">All Users (ALL)</option>
-      ${userOptions}
-    `;
-  }
-
-  if (notificationUserFilter) {
-    notificationUserFilter.innerHTML = `
-      <option value="">All User IDs</option>
-      <option value="ALL">ALL</option>
-      ${userOptions}
-    `;
-  }
-}
-
-function getSelectedNotificationType() {
-  const checkedType = document.querySelector('input[name="notification-type"]:checked');
-  return checkedType ? checkedType.value : 'SYSTEM';
-}
-
-function createNotificationLevel(type) {
-  const map = {
-    SYSTEM: 'High',
-    PROMO: 'Info',
-    SOS: 'High',
-    REPORT: 'Medium'
-  };
-  return map[type] || 'Info';
-}
-
-function handleNotificationSend() {
+async function handleNotificationSend() {
   const titleInput = document.getElementById('notification-title');
   const descriptionInput = document.getElementById('notification-description');
-  const userSelect = document.getElementById('notification-user-id');
   const feedback = document.getElementById('notification-feedback');
+  const sendBtn = document.getElementById('notification-send-btn');
 
-  if (!titleInput || !descriptionInput || !userSelect) {
+  if (!titleInput || !descriptionInput) {
     return;
   }
 
   const title = titleInput.value.trim();
   const description = descriptionInput.value.trim();
-  const userId = userSelect.value || 'ALL';
-  const type = getSelectedNotificationType();
 
   if (!title || !description) {
     alert('Please enter both title and description.');
     return;
   }
 
-  notificationSequence += 1;
-  const timestamp = getCurrentTimestamp();
-  const notification = {
-    id: `NTF-${notificationSequence}`,
-    userId,
-    title,
-    description,
-    detail: description,
-    timestamp,
-    time: timestamp,
-    type,
-    level: createNotificationLevel(type)
-  };
-
-  notificationsData.unshift(notification);
-  applyNotificationFilters();
-
-  titleInput.value = '';
-  descriptionInput.value = '';
-  userSelect.value = 'ALL';
-  const defaultType = document.getElementById('notification-type-system');
-  if (defaultType) {
-    defaultType.checked = true;
+  if (typeof db === 'undefined') {
+    alert('Database not available.');
+    return;
   }
 
-  if (feedback) {
-    feedback.classList.remove('d-none');
-    setTimeout(() => feedback.classList.add('d-none'), 2500);
+  if (sendBtn) sendBtn.disabled = true;
+
+  try {
+    await db.collection('notifications').add({
+      title,
+      description,
+      type: 'PROMO',
+      userId: 'ALL',
+      timestamp: Date.now()
+    });
+
+    titleInput.value = '';
+    descriptionInput.value = '';
+
+    if (feedback) {
+      feedback.classList.remove('d-none');
+      setTimeout(() => feedback.classList.add('d-none'), 2500);
+    }
+
+    loadNotificationsFromFirestore();
+  } catch (err) {
+    console.error('Failed to send notification:', err);
+    alert('Failed to send notification. Please try again.');
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
   }
 }
 
 function applyNotificationFilters() {
-  const searchInput = document.getElementById('notification-user-search');
-  const userFilter = document.getElementById('notification-user-filter');
-  const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
-  const selectedUserId = userFilter ? userFilter.value : '';
+  const typeFilter = document.getElementById('notification-user-filter');
+  const selectedType = typeFilter ? typeFilter.value : '';
 
-  const filteredNotifications = notificationsData.filter(notification => {
-    const normalizedUserId = String(notification.userId || '').toLowerCase();
-    const matchesQuery = !query || normalizedUserId.includes(query);
-    const matchesFilter = !selectedUserId || notification.userId === selectedUserId;
-    return matchesQuery && matchesFilter;
-  });
+  const filtered = allNotificationsData.filter(notification =>
+    !selectedType || notification.type === selectedType
+  );
 
-  renderNotificationsTable('notifications-table-body', filteredNotifications);
+  renderNotificationsTable('notifications-table-body', filtered);
 }
 
 function initializeNotificationModule() {
-  populateNotificationUserOptions();
-  applyNotificationFilters();
+  loadNotificationsFromFirestore();
 
   const sendButton = document.getElementById('notification-send-btn');
-  const userSearch = document.getElementById('notification-user-search');
-  const userFilter = document.getElementById('notification-user-filter');
+  const typeFilter = document.getElementById('notification-user-filter');
 
   if (sendButton) {
     sendButton.addEventListener('click', handleNotificationSend);
   }
 
-  if (userSearch) {
-    userSearch.addEventListener('input', applyNotificationFilters);
-  }
-
-  if (userFilter) {
-    userFilter.addEventListener('change', applyNotificationFilters);
+  if (typeFilter) {
+    typeFilter.addEventListener('change', applyNotificationFilters);
   }
 }
