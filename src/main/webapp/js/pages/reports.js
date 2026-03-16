@@ -35,8 +35,12 @@ async function fetchReports() {
             const safeSeverity = report.severity || 'Low';
             const safeStatus = report.status || 'Received';
 
-            const statusTone = safeStatus === 'Completed' ? 'success' : (safeStatus === 'In Progress' ? 'warning' : 'info');
-            const severityTone = safeSeverity === 'High' ? 'danger' : (safeSeverity === 'Medium' ? 'warning' : 'info');
+            const statusTone = safeStatus === 'Completed'
+                ? 'success'
+                : (safeStatus === 'In Progress' || safeStatus === 'Assigned')
+                    ? 'warning'
+                    : (safeStatus === 'Received' ? 'info' : 'secondary');
+            const severityTone = safeSeverity === 'High' ? 'danger' : (safeSeverity === 'Medium' ? 'warning' : 'success');
 
             const safeLatitude = Number.isFinite(Number(report.latitude)) ? Number(report.latitude).toFixed(4) : '-';
             const safeLongitude = Number.isFinite(Number(report.longitude)) ? Number(report.longitude).toFixed(4) : '-';
@@ -70,7 +74,7 @@ function openReportDetails(docId) {
         ? '../report-details.html'
         : 'report-details.html';
 
-    window.location.href = `${detailsPagePath}?reportId=${encodeURIComponent(String(docId))}`;
+    window.open(`${detailsPagePath}?reportId=${encodeURIComponent(String(docId))}`, '_blank', 'noopener');
 }
 
 function initializeReportsModule() {

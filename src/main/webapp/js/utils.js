@@ -103,7 +103,7 @@ function badgeFromPriority(priority) {
   const map = {
     High: 'danger',
     Medium: 'warning',
-    Low: 'info',
+    Low: 'success',
     Info: 'info'
   };
   return map[priority] || 'secondary';
