@@ -277,9 +277,12 @@
       }
 
       function buildPopupContent(report) {
-        const safeDocId = encodeURIComponent(String(report.docId));
+        const safeDocId = report.docId ? encodeURIComponent(String(report.docId)) : '';
         const googleMapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(`${report.latitude},${report.longitude}`)}`;
         const locationText = getReportAddress(report);
+        const detailsLink = report.source === 'emergency_reports'
+          ? (safeDocId ? `<a href="sos-details.html?sosId=${safeDocId}">View SOS</a>` : '')
+          : (safeDocId ? `<a href="report-details.html?reportId=${safeDocId}">View Report</a>` : '');
         return `
           <div class="info-window">
             <h3>${escapeHtml(report.reportId || report.docId)}</h3>
@@ -288,7 +291,7 @@
             <p><strong>Status:</strong> ${escapeHtml(report.status)}</p>
             <p><strong>Created:</strong> ${escapeHtml(report.createdAt)}</p>
             <p><strong>Location:</strong> ${escapeHtml(locationText)}</p>
-            <a href="report-details.html?reportId=${safeDocId}">View Report</a>
+            ${detailsLink}
             <a href="${googleMapsUrl}" target="_blank" rel="noopener">Open Google Maps</a>
           </div>
         `;
@@ -397,9 +400,15 @@
             : sosIdParam
               ? `SOS ${escapeHtml(sosIdParam)}`
               : 'Selected Location';
+          const contextDetailsLink = reportIdParam
+            ? `<a href="report-details.html?reportId=${encodeURIComponent(reportIdParam)}">View Report</a>`
+            : sosIdParam
+              ? `<a href="sos-details.html?sosId=${encodeURIComponent(sosIdParam)}">View SOS</a>`
+              : '';
           const contextPopup = new mapboxgl.Popup({ offset: 16 }).setHTML(`
             <div class="info-window">
               <h3>${contextTitle}</h3>
+              ${contextDetailsLink}
               <p><strong>Latitude:</strong> ${latValue.toFixed(6)}</p>
               <p><strong>Longitude:</strong> ${lngValue.toFixed(6)}</p>
               <a href="https://www.google.com/maps?q=${encodeURIComponent(`${latValue},${lngValue}`)}" target="_blank" rel="noopener">Open Google Maps</a>
@@ -442,5 +451,6 @@
 
       initMap();
     </script>
+      <script src="js/firebase-listener.js"></script>
   </body>
 </html>
