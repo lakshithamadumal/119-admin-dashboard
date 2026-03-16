@@ -1,13 +1,31 @@
 
+const STATUS_FLOW = ['Received', 'Assigned', 'In Progress', 'Completed'];
+const STATUS_TIMESTAMP_FIELD_MAP = {
+    Assigned: 'assignedTimestamp',
+    'In Progress': 'inProgressTimestamp',
+    Completed: 'completedTimestamp'
+};
+
+let activeReportDocId = null;
+let activeReportStatus = 'Received';
+let activeStatusHistory = {
+    Received: '-',
+    Assigned: '-',
+    'In Progress': '-',
+    Completed: '-'
+};
+
 async function renderReportDetailsPage(docId) {
     if (!docId) return;
 
     try {
         console.log("Fetching data for Report:", docId);
+        activeReportDocId = docId;
         
         const reportDoc = await db.collection('reports').doc(docId).get();
         if (!reportDoc.exists) return;
         const report = reportDoc.data();
+        activeReportStatus = report.status || 'Received';
 
         const userDoc = await db.collection('users').doc(report.uid).get();
         const user = userDoc.exists ? userDoc.data() : {};
@@ -78,8 +96,10 @@ async function renderReportDetailsPage(docId) {
             "In Progress": report.inProgressTimestamp?.toDate ? report.inProgressTimestamp.toDate().toLocaleString() : "-",
             Completed: report.completedTimestamp?.toDate ? report.completedTimestamp.toDate().toLocaleString() : "-"
         };
+        activeStatusHistory = history;
         
-        updateStatusTimelineUI(report.status, history);
+        updateStatusTimelineUI(activeReportStatus, history);
+        updateStatusActionButtons(activeReportStatus);
 
     } catch (e) {
         console.error("Data Load Error:", e);
@@ -87,7 +107,7 @@ async function renderReportDetailsPage(docId) {
 }
 
 function updateStatusTimelineUI(currentStatus, history) {
-    const steps = ['Received', 'Assigned', 'In Progress', 'Completed'];
+    const steps = STATUS_FLOW;
     const currentIdx = steps.indexOf(currentStatus);
 
     steps.forEach((step, idx) => {
@@ -106,9 +126,139 @@ function updateStatusTimelineUI(currentStatus, history) {
                 dot.style.color = "#adb5bd";
             }
         }
-        if (line && idx < currentIdx) {
-            line.style.background = "#7367f0";
+        if (line) {
+            line.style.background = idx < currentIdx ? "#7367f0" : "#dee2e6";
         }
         if (timeEl) timeEl.textContent = history[step] || '-';
     });
+
+    const statusBadge = document.getElementById('detail-status-badge');
+    if (statusBadge) {
+        statusBadge.textContent = currentStatus || 'Received';
+        statusBadge.className = `badge bg-label-${badgeFromReportStatus(currentStatus || 'Received')}`;
+    }
+
+    setTextById('detail-report-status', currentStatus || 'Received');
+}
+
+function getNextAllowedStatus(currentStatus) {
+    const currentIdx = STATUS_FLOW.indexOf(currentStatus);
+    if (currentIdx < 0 || currentIdx >= STATUS_FLOW.length - 1) {
+        return null;
+    }
+    return STATUS_FLOW[currentIdx + 1];
+}
+
+function updateStatusActionButtons(currentStatus) {
+    const buttonByStatus = {
+        Assigned: 'status-btn-assigned',
+        'In Progress': 'status-btn-inprogress',
+        Completed: 'status-btn-completed'
+    };
+
+    const nextStatus = getNextAllowedStatus(currentStatus);
+    Object.keys(buttonByStatus).forEach((status) => {
+        const button = document.getElementById(buttonByStatus[status]);
+        if (!button) return;
+        button.disabled = status !== nextStatus;
+    });
+}
+
+function setStatusButtonsBusy(isBusy) {
+    const buttonIds = ['status-btn-assigned', 'status-btn-inprogress', 'status-btn-completed'];
+    buttonIds.forEach((id) => {
+        const button = document.getElementById(id);
+        if (!button) return;
+        button.disabled = isBusy ? true : button.disabled;
+    });
+}
+
+async function showStatusAlert(icon, title, text) {
+    if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+        await Swal.fire({
+            icon,
+            title,
+            text,
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    alert(`${title}\n${text}`);
+}
+
+async function confirmStatusChange(currentStatus, targetStatus) {
+    if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+        const result = await Swal.fire({
+            icon: 'question',
+            title: 'Change Report Status?',
+            text: `${currentStatus} -> ${targetStatus}`,
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Change',
+            cancelButtonText: 'Cancel'
+        });
+        return result.isConfirmed;
+    }
+
+    return window.confirm(`Change status from ${currentStatus} to ${targetStatus}?`);
+}
+
+async function setReportStatus(targetStatus) {
+    if (!activeReportDocId) {
+        await showStatusAlert('error', 'Status Update Failed', 'Report ID not found.');
+        return;
+    }
+
+    const currentStatus = activeReportStatus || 'Received';
+    const currentIdx = STATUS_FLOW.indexOf(currentStatus);
+    const targetIdx = STATUS_FLOW.indexOf(targetStatus);
+
+    if (targetIdx === -1) {
+        await showStatusAlert('error', 'Invalid Status', 'Selected status is not valid.');
+        return;
+    }
+
+    if (targetIdx === currentIdx) {
+        await showStatusAlert('info', 'No Change Needed', `Report is already marked as ${targetStatus}.`);
+        return;
+    }
+
+    if (targetIdx !== currentIdx + 1) {
+        const nextStatus = getNextAllowedStatus(currentStatus) || 'Completed';
+        await showStatusAlert('warning', 'Invalid Status Flow', `Please change status to ${nextStatus} next.`);
+        return;
+    }
+
+    const confirmed = await confirmStatusChange(currentStatus, targetStatus);
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        setStatusButtonsBusy(true);
+
+        const now = firebase.firestore.Timestamp.now();
+        const payload = { status: targetStatus };
+        const timestampField = STATUS_TIMESTAMP_FIELD_MAP[targetStatus];
+        if (timestampField) {
+            payload[timestampField] = now;
+        }
+
+        await db.collection('reports').doc(activeReportDocId).update(payload);
+
+        activeReportStatus = targetStatus;
+        if (timestampField) {
+            activeStatusHistory[targetStatus] = now.toDate().toLocaleString();
+        }
+
+        updateStatusTimelineUI(activeReportStatus, activeStatusHistory);
+        updateStatusActionButtons(activeReportStatus);
+
+        await showStatusAlert('success', 'Status Updated', `Report status changed to ${targetStatus}.`);
+    } catch (error) {
+        console.error('Status update failed:', error);
+        await showStatusAlert('error', 'Update Failed', 'Unable to update report status. Please try again.');
+    } finally {
+        updateStatusActionButtons(activeReportStatus);
+    }
 }
