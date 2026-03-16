@@ -42,9 +42,21 @@ function setTextById(id, value) {
 function copyTextToClipboard(text) {
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(text).then(() => {
-      alert('Location link copied.');
+      Swal.fire({
+    icon: 'success',
+    title: 'Copied!',
+    text: 'Location link copied successfully.',
+    timer: 2000,
+    showConfirmButton: false
+});
     }).catch(() => {
-      alert('Unable to copy. Please copy the link manually.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Copy Failed',
+        text: 'Unable to copy. Please copy the link manually.',
+        timer: 2000,
+        showConfirmButton: false
+      });
     });
     return;
   }
@@ -57,7 +69,13 @@ function copyTextToClipboard(text) {
   const success = document.execCommand('copy');
   document.body.removeChild(tempInput);
 
-  alert(success ? 'Location link copied.' : 'Unable to copy. Please copy the link manually.');
+  Swal.fire({
+    icon: 'success',
+    title: 'Copied!',
+    text: 'Location link copied successfully.',
+    timer: 2000,
+    showConfirmButton: false
+  });
 }
 
 function formatAmount(amount, currency) {

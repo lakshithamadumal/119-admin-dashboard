@@ -163,48 +163,44 @@
     <div id="map"></div>
 
     <script src="js/utils.js"></script>
-    <script src="js/data.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoibGFreTIwMDMiLCJhIjoiY21sbmdpdXE4MHNsdDNlcHVkb2FtYWQ0ZiJ9.Nj48QIGZ9wSy8Zuw7NEUjQ';
 
-      // Load categoriesData and reportsData in js/data.js or replace these mappings with your API payload.
-      const categories = categoriesData;
-      const reports = reportsData
-        .map(report => ({
-          id: report.id,
-          reportId: report.reportId,
-          category_id: report.categoryId,
-          priority: report.priority,
-          latitude: parseCoordinate(report.latitude, -90, 90),
-          longitude: parseCoordinate(report.longitude, -180, 180),
-          status: report.status,
-          description: report.description,
-          created_at: report.createdDate
-        }))
-        .filter(report => report.latitude !== null && report.longitude !== null);
-
+      const defaultCenter = [80.7718, 7.8731];
+      const defaultZoom = 7;
       const priorityColors = {
-        High: '#ef4444',
-        Medium: '#f59e0b',
-        Low: '#22c55e'
+        critical: '#b91c1c',
+        high: '#ef4444',
+        medium: '#f59e0b',
+        low: '#22c55e',
+        info: '#0ea5e9'
       };
 
-      function getCategoryName(categoryId) {
-        const category = categories.find(item => item.id === categoryId);
-        return category ? category.name : 'Unknown';
+      function normalizeSeverity(value) {
+        if (value === null || value === undefined) {
+          return 'low';
+        }
+        return String(value).trim().toLowerCase();
       }
 
-      function escapeHtml(value) {
-        return String(value)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
+      function getSeverityColor(value) {
+        const normalized = normalizeSeverity(value);
+        return priorityColors[normalized] || '#6b7280';
       }
 
       function parseCoordinate(value, min, max) {
+        if (typeof value === 'object') {
+          const geo = readGeoPointLike(value);
+          if (geo) {
+            return parseCoordinate(min === -90 ? geo.latitude : geo.longitude, min, max);
+          }
+          return null;
+        }
+
         if (value === null || value === undefined) {
           return null;
         }
@@ -222,15 +218,157 @@
         return numeric;
       }
 
-      function initMap() {
+      function readGeoPointLike(value) {
+        if (!value || typeof value !== 'object') {
+          return null;
+        }
+
+        const latCandidate = value.latitude ?? value.lat ?? value._lat;
+        const lngCandidate = value.longitude ?? value.lng ?? value.lon ?? value._long ?? value._lng;
+        if (latCandidate === undefined || lngCandidate === undefined) {
+          return null;
+        }
+
+        return { latitude: latCandidate, longitude: lngCandidate };
+      }
+
+      function getTimestampLabel(timestamp) {
+        if (timestamp && typeof timestamp.toDate === 'function') {
+          return timestamp.toDate().toLocaleString();
+        }
+
+        if (timestamp) {
+          const parsed = new Date(timestamp);
+          if (!Number.isNaN(parsed.getTime())) {
+            return parsed.toLocaleString();
+          }
+        }
+
+        return '-';
+      }
+
+      function getReportCoordinates(report) {
+        const locationGeo = readGeoPointLike(report.location) || readGeoPointLike(report.coordinates) || readGeoPointLike(report.geoPoint);
+        const latitudeValue = report.latitude ?? report.lat ?? report.geoLat ?? (locationGeo ? locationGeo.latitude : null);
+        const longitudeValue = report.longitude ?? report.lng ?? report.geoLng ?? (locationGeo ? locationGeo.longitude : null);
+
+        return {
+          latitude: parseCoordinate(latitudeValue, -90, 90),
+          longitude: parseCoordinate(longitudeValue, -180, 180)
+        };
+      }
+
+      function buildPopupContent(report) {
+        const safeDocId = encodeURIComponent(String(report.docId));
+        const detailsPage = report.source === 'emergency_reports' ? 'sos-details.html' : 'report-details.html';
+        const detailsParam = report.source === 'emergency_reports' ? 'sosId' : 'reportId';
+        const googleMapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(`${report.latitude},${report.longitude}`)}`;
+
+        return `
+          <div class="info-window">
+            <h3>${escapeHtml(report.reportId || report.docId)}</h3>
+            <p><strong>Category:</strong> ${escapeHtml(report.category)}</p>
+            <p><strong>Severity:</strong> ${escapeHtml(report.severity)}</p>
+            <p><strong>Status:</strong> ${escapeHtml(report.status)}</p>
+            <p><strong>Created:</strong> ${escapeHtml(report.createdAt)}</p>
+            <p><strong>Location:</strong> ${report.latitude.toFixed(5)}, ${report.longitude.toFixed(5)}</p>
+            <a href="${detailsPage}?${detailsParam}=${safeDocId}">View Report</a>
+            <a href="${googleMapsUrl}" target="_blank" rel="noopener">Open Google Maps</a>
+          </div>
+        `;
+      }
+
+      async function loadReports() {
+        if (typeof db === 'undefined') {
+          throw new Error('Firestore is not initialized.');
+        }
+
+        const snapshot = await db.collection('reports').get();
+        const records = [];
+
+        snapshot.forEach((doc) => {
+          const data = doc.data() || {};
+          const coordinates = getReportCoordinates(data);
+          if (coordinates.latitude === null || coordinates.longitude === null) {
+            return;
+          }
+
+          records.push({
+            docId: doc.id,
+            source: 'reports',
+            reportId: data.reportId || doc.id,
+            category: data.categoryName || data.category || '-',
+            severity: data.severity || data.priority || 'Low',
+            status: data.status || 'Received',
+            createdAt: getTimestampLabel(data.timestamp),
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude
+          });
+        });
+
+        return records;
+      }
+
+      async function loadEmergencyReports() {
+        if (typeof db === 'undefined') {
+          throw new Error('Firestore is not initialized.');
+        }
+
+        const snapshot = await db.collection('emergency_reports').get();
+        const records = [];
+
+        snapshot.forEach((doc) => {
+          const data = doc.data() || {};
+          const coordinates = getReportCoordinates(data);
+          if (coordinates.latitude === null || coordinates.longitude === null) {
+            return;
+          }
+
+          records.push({
+            docId: doc.id,
+            source: 'emergency_reports',
+            reportId: data.reportId || data.sosId || doc.id,
+            category: data.categoryName || data.category || 'SOS',
+            severity: data.severity || data.priority || 'High',
+            status: data.status || 'Open',
+            createdAt: getTimestampLabel(data.timestamp),
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude
+          });
+        });
+
+        return records;
+      }
+
+      async function loadAllMapRecords() {
+        const [reports, emergencyReports] = await Promise.all([
+          loadReports().catch(() => []),
+          loadEmergencyReports().catch(() => [])
+        ]);
+
+        const merged = [...reports, ...emergencyReports];
+        const seen = new Set();
+        const deduped = [];
+
+        merged.forEach((item) => {
+          const key = `${item.source}:${item.docId}`;
+          if (seen.has(key)) {
+            return;
+          }
+          seen.add(key);
+          deduped.push(item);
+        });
+
+        return deduped;
+      }
+
+      async function initMap() {
         const params = new URLSearchParams(window.location.search);
         const latParam = params.get('lat');
         const lngParam = params.get('lng');
         const reportIdParam = params.get('reportId');
         const sosIdParam = params.get('sosId');
         const priorityParam = params.get('priority');
-        const defaultCenter = [80.7718, 7.8731];
-        const defaultZoom = 7;
         const latValue = parseCoordinate(latParam, -90, 90);
         const lngValue = parseCoordinate(lngParam, -180, 180);
         const hasCoordinates = latValue !== null && lngValue !== null;
@@ -248,39 +386,36 @@
 
         map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
+        let reports = [];
+        try {
+          reports = await loadAllMapRecords();
+        } catch (error) {
+          console.error('Unable to load map records from Firestore:', error);
+        }
+
         const bounds = new mapboxgl.LngLatBounds();
 
         const focusedReport = reportIdParam
-          ? reports.find(item => String(item.id) === String(reportIdParam) || String(item.reportId) === String(reportIdParam))
+          ? reports.find(item => String(item.docId) === String(reportIdParam) || String(item.reportId) === String(reportIdParam))
           : null;
         let focusedMarker = null;
 
         reports.forEach(report => {
           const markerEl = document.createElement('div');
           markerEl.className = 'status-marker';
-          markerEl.style.backgroundColor = priorityColors[report.priority] || '#6b7280';
-          if (focusedReport && focusedReport.id === report.id) {
+          markerEl.style.backgroundColor = getSeverityColor(report.severity);
+          if (focusedReport && focusedReport.docId === report.docId) {
             markerEl.classList.add('focused');
           }
 
-          const categoryName = getCategoryName(report.category_id);
-          const popupContent = `
-            <h3>${escapeHtml(report.reportId || `Report #${report.id}`)}</h3>
-            <p>Category: ${escapeHtml(categoryName)}</p>
-            <p>Priority: ${escapeHtml(report.priority)}</p>
-            <p>Status: ${escapeHtml(report.status)}</p>
-            <p>Created: ${escapeHtml(report.created_at)}</p>
-            <a href="report-details.html?reportId=${report.id}">View Report</a>
-          `;
-
-          const popup = new mapboxgl.Popup({ offset: 16 }).setHTML(popupContent);
+          const popup = new mapboxgl.Popup({ offset: 16 }).setHTML(buildPopupContent(report));
 
           const marker = new mapboxgl.Marker(markerEl)
             .setLngLat([report.longitude, report.latitude])
             .setPopup(popup)
             .addTo(map);
 
-          if (focusedReport && focusedReport.id === report.id) {
+          if (focusedReport && focusedReport.docId === report.docId) {
             focusedMarker = marker;
           }
 
@@ -290,16 +425,19 @@
         if (!focusedReport && hasCoordinates) {
           const focusEl = document.createElement('div');
           focusEl.className = 'status-marker focused';
-          focusEl.style.backgroundColor = priorityColors[priorityParam] || '#ef4444';
+          focusEl.style.backgroundColor = getSeverityColor(priorityParam || 'high');
           const contextTitle = reportIdParam
             ? `Report ${escapeHtml(reportIdParam)}`
             : sosIdParam
               ? `SOS ${escapeHtml(sosIdParam)}`
               : 'Selected Location';
           const contextPopup = new mapboxgl.Popup({ offset: 16 }).setHTML(`
-            <h3>${contextTitle}</h3>
-            <p>Latitude: ${latValue.toFixed(6)}</p>
-            <p>Longitude: ${lngValue.toFixed(6)}</p>
+            <div class="info-window">
+              <h3>${contextTitle}</h3>
+              <p><strong>Latitude:</strong> ${latValue.toFixed(6)}</p>
+              <p><strong>Longitude:</strong> ${lngValue.toFixed(6)}</p>
+              <a href="https://www.google.com/maps?q=${encodeURIComponent(`${latValue},${lngValue}`)}" target="_blank" rel="noopener">Open Google Maps</a>
+            </div>
           `);
           const contextMarker = new mapboxgl.Marker(focusEl)
             .setLngLat([lngValue, latValue])
@@ -314,7 +452,7 @@
           }
         }
 
-        if (focusedReport) {
+        if (focusedReport && reports.length) {
           map.setCenter([focusedReport.longitude, focusedReport.latitude]);
           map.setZoom(15);
           if (focusedMarker) {
@@ -329,6 +467,8 @@
           map.setCenter([lngValue, latValue]);
           map.setZoom(15);
         } else if (reports.length) {
+          map.fitBounds(bounds, { padding: 80, maxZoom: 13 });
+        } else {
           map.setCenter(defaultCenter);
           map.setZoom(defaultZoom);
         }

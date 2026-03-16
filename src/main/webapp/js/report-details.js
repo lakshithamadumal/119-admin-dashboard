@@ -8,6 +8,10 @@ const STATUS_TIMESTAMP_FIELD_MAP = {
 
 let activeReportDocId = null;
 let activeReportStatus = 'Received';
+let activeReportPublicId = null;
+let activeReportSeverity = 'Low';
+let activeReportLatitude = null;
+let activeReportLongitude = null;
 let activeStatusHistory = {
     Received: '-',
     Assigned: '-',
@@ -20,11 +24,14 @@ async function renderReportDetailsPage(docId) {
 
     try {
         console.log("Fetching data for Report:", docId);
-        activeReportDocId = docId;
-        
-        const reportDoc = await db.collection('reports').doc(docId).get();
-        if (!reportDoc.exists) return;
-        const report = reportDoc.data();
+        const resolved = await resolveReportDocument(docId);
+        if (!resolved) {
+            showLocationAlert('error', 'Report Not Found', 'Unable to load this report details record.');
+            return;
+        }
+
+        activeReportDocId = resolved.docId;
+        const report = resolved.data;
         activeReportStatus = report.status || 'Received';
 
         const userDoc = await db.collection('users').doc(report.uid).get();
@@ -51,14 +58,21 @@ async function renderReportDetailsPage(docId) {
             setTextById('detail-subscription-expiry', expDate); 
         }
 
-        setTextById('detail-report-id', report.reportId || docId);
+        const coordinates = getReportCoordinates(report);
+        activeReportPublicId = report.reportId || resolved.docId;
+        activeReportSeverity = report.severity || report.priority || 'Low';
+        activeReportLatitude = coordinates.latitude;
+        activeReportLongitude = coordinates.longitude;
+
+        setTextById('detail-report-id', activeReportPublicId);
         setTextById('detail-report-category', report.categoryName || '-');
         setTextById('detail-report-status', report.status || 'Received');
-        setTextById('detail-report-latitude', report.latitude || '-');
-        setTextById('detail-report-longitude', report.longitude || '-');
-        setTextById('detail-report-description', report.message || '-');
+        setTextById('detail-report-latitude', coordinates.latitude !== null ? coordinates.latitude : '-');
+        setTextById('detail-report-longitude', coordinates.longitude !== null ? coordinates.longitude : '-');
+        setTextById('detail-report-description', report.message || report.description || '-');
         setTextById('detail-report-created', report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : '-');
-        
+        setTextById('detail-report-address', report.address || '-');
+
         setTextById('detail-user-name', user.name || '-');
         setTextById('detail-user-email', user.email || '-');
         setTextById('detail-user-phone', user.phoneNumber || '-');
@@ -80,7 +94,7 @@ async function renderReportDetailsPage(docId) {
 
         const priorityBadge = document.getElementById('detail-report-priority');
         if (priorityBadge) {
-            const severity = report.severity || 'Low';
+            const severity = report.severity || report.priority || 'Low';
             priorityBadge.textContent = severity;
             priorityBadge.className = `badge bg-label-${badgeFromPriority(severity)}`;
         }
@@ -103,7 +117,122 @@ async function renderReportDetailsPage(docId) {
 
     } catch (e) {
         console.error("Data Load Error:", e);
+        showLocationAlert('error', 'Data Load Error', 'Failed to load report data. Please refresh and try again.');
     }
+}
+
+async function resolveReportDocument(identifier) {
+    const normalized = String(identifier || '').trim();
+    if (!normalized) {
+        return null;
+    }
+
+    const byDoc = await db.collection('reports').doc(normalized).get();
+    if (byDoc.exists) {
+        return { docId: byDoc.id, data: byDoc.data() };
+    }
+
+    const byReportId = await db.collection('reports')
+        .where('reportId', '==', normalized)
+        .limit(1)
+        .get();
+
+    if (!byReportId.empty) {
+        const matchedDoc = byReportId.docs[0];
+        return { docId: matchedDoc.id, data: matchedDoc.data() };
+    }
+
+    return null;
+}
+
+function readGeoPointLike(value) {
+    if (!value || typeof value !== 'object') {
+        return null;
+    }
+
+    const latCandidate = value.latitude ?? value.lat ?? value._lat;
+    const lngCandidate = value.longitude ?? value.lng ?? value.lon ?? value._long ?? value._lng;
+    if (latCandidate === undefined || lngCandidate === undefined) {
+        return null;
+    }
+
+    return { latitude: latCandidate, longitude: lngCandidate };
+}
+
+function parseCoordinate(value, min, max) {
+    if (typeof value === 'object') {
+        const geo = readGeoPointLike(value);
+        if (geo) {
+            return parseCoordinate(min === -90 ? geo.latitude : geo.longitude, min, max);
+        }
+        return null;
+    }
+
+    if (value === null || value === undefined) {
+        return null;
+    }
+
+    const numeric = Number.parseFloat(String(value).trim());
+    if (!Number.isFinite(numeric) || numeric < min || numeric > max) {
+        return null;
+    }
+
+    return numeric;
+}
+
+function getReportCoordinates(report) {
+    const locationGeo = readGeoPointLike(report.location) || readGeoPointLike(report.coordinates) || readGeoPointLike(report.geoPoint);
+    const latitudeValue = report.latitude ?? report.lat ?? report.geoLat ?? (locationGeo ? locationGeo.latitude : null);
+    const longitudeValue = report.longitude ?? report.lng ?? report.geoLng ?? (locationGeo ? locationGeo.longitude : null);
+
+    return {
+        latitude: parseCoordinate(latitudeValue, -90, 90),
+        longitude: parseCoordinate(longitudeValue, -180, 180)
+    };
+}
+
+function showLocationAlert(icon, title, text) {
+    if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+        Swal.fire({
+            icon,
+            title,
+            text,
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    alert(`${title}\n${text}`);
+}
+
+function detailViewMap() {
+    if (activeReportLatitude === null || activeReportLongitude === null) {
+        showLocationAlert('warning', 'Location Missing', 'No latitude/longitude found for this report.');
+        return;
+    }
+
+    const params = new URLSearchParams();
+    params.set('lat', activeReportLatitude);
+    params.set('lng', activeReportLongitude);
+    params.set('priority', activeReportSeverity || 'Low');
+
+    if (activeReportDocId) {
+        params.set('reportId', activeReportDocId);
+    } else if (activeReportPublicId) {
+        params.set('reportId', activeReportPublicId);
+    }
+
+    window.open(`map.html?${params.toString()}`, '_blank', 'noopener');
+}
+
+function detailCopyLocation() {
+    if (activeReportLatitude === null || activeReportLongitude === null) {
+        showLocationAlert('warning', 'Location Missing', 'No latitude/longitude found for this report.');
+        return;
+    }
+
+    const googleMapsLink = `https://www.google.com/maps?q=${encodeURIComponent(`${activeReportLatitude},${activeReportLongitude}`)}`;
+    copyTextToClipboard(googleMapsLink);
 }
 
 function updateStatusTimelineUI(currentStatus, history) {
