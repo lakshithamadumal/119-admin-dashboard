@@ -93,10 +93,9 @@ function renderNotificationsTable(targetId, data) {
       <td>${buildBadge(escapeHtml(notification.type), badgeFromNotificationType(notification.type))}</td>
       <td>${escapeHtml(notification.timestamp)}</td>
       <td>
-        <button class="btn btn-sm btn-outline-primary"
-          onclick="showNotificationDesc('${safeTitle}', '${safeDesc}')">
-          View
-        </button>
+        <span class="badge bg-label-primary" style="cursor:pointer;" onclick="showNotificationDesc('${safeTitle}', '${safeDesc}')">
+          <i class="bx bx-show me-1"></i>View
+        </span>
       </td>
     </tr>
   `;
