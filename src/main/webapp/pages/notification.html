@@ -11,7 +11,10 @@
   <div class="col-12">
     <div class="card">
       <div class="card-header">
-        <h5 class="mb-0">Notification Form</h5>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h5 class="mb-0">Notification Form</h5>
+          <span class="badge bg-label-primary">SYSTEM</span>
+        </div>
       </div>
       <div class="card-body">
         <div class="row g-4">
@@ -20,19 +23,19 @@
             <input type="text" class="form-control" id="notification-title" placeholder="Enter notification title">
           </div>
 
+          <div class="col-md-6">
+            <label for="notification-type" class="form-label">Type</label>
+            <input type="text" class="form-control" id="notification-type" value="SYSTEM" readonly>
+          </div>
+
           <div class="col-12">
             <label for="notification-description" class="form-label">Description</label>
             <textarea class="form-control" id="notification-description" rows="4" placeholder="Enter notification description"></textarea>
+            <div class="form-text">This notification will be sent to all users in the users collection.</div>
           </div>
 
           <div class="col-12 d-flex justify-content-end">
-            <button type="button" class="btn btn-primary" id="notification-send-btn">Send</button>
-          </div>
-
-          <div class="col-12">
-            <div class="alert alert-success d-none mb-0" id="notification-feedback" role="alert">
-              Notification sent successfully.
-            </div>
+            <button type="button" class="btn btn-primary" id="notification-send-btn">Send to All Users</button>
           </div>
         </div>
       </div>

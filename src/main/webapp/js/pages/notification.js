@@ -5,6 +5,18 @@
 
 let allNotificationsData = [];
 
+function showNotificationAlert(options) {
+  if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+    return Swal.fire(options);
+  }
+
+  if (options && options.text) {
+    alert(options.text);
+  }
+
+  return Promise.resolve();
+}
+
 function parseTimestampLabel(value) {
   if (value === undefined || value === null) return '-';
   const ms = typeof value === 'number'
@@ -76,15 +88,16 @@ function renderNotificationsTable(targetId, data) {
   if (data.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="text-center text-body-secondary py-4">No notifications found for the selected user ID.</td>
+        <td colspan="6" class="text-center text-body-secondary py-4">No notifications found for the selected type.</td>
       </tr>
     `;
     return;
   }
 
   tableBody.innerHTML = data.map(notification => {
-    const safeDesc = escapeHtml(notification.description || '-');
     const safeTitle = escapeHtml(notification.title);
+    const encodedTitle = encodeURIComponent(notification.title || 'Notification');
+    const encodedDesc = encodeURIComponent(notification.description || '-');
     return `
     <tr>
       <td>${escapeHtml(notification.id)}</td>
@@ -93,7 +106,7 @@ function renderNotificationsTable(targetId, data) {
       <td>${buildBadge(escapeHtml(notification.type), badgeFromNotificationType(notification.type))}</td>
       <td>${escapeHtml(notification.timestamp)}</td>
       <td>
-        <span class="badge bg-label-primary" style="cursor:pointer;" onclick="showNotificationDesc('${safeTitle}', '${safeDesc}')">
+        <span class="badge bg-label-primary" style="cursor:pointer;" onclick="showNotificationDesc('${encodedTitle}', '${encodedDesc}')">
           <i class="bx bx-show me-1"></i>View
         </span>
       </td>
@@ -102,10 +115,38 @@ function renderNotificationsTable(targetId, data) {
   }).join('');
 }
 
+function buildNotificationId(sequenceNumber) {
+  return `#NTF-${String(sequenceNumber).padStart(4, '0')}`;
+}
+
+function extractNotificationSequence(value) {
+  const numericPart = Number(String(value || '').replace(/\D/g, ''));
+  return Number.isNaN(numericPart) ? 0 : numericPart;
+}
+
+async function getNextNotificationSequence() {
+  const snapshot = await db.collection('notifications').get();
+  let maxSequence = 0;
+
+  snapshot.forEach(doc => {
+    const data = doc.data() || {};
+    maxSequence = Math.max(maxSequence, extractNotificationSequence(data.id || doc.id));
+  });
+
+  return maxSequence + 1;
+}
+
+function chunkArray(items, chunkSize) {
+  const chunks = [];
+  for (let index = 0; index < items.length; index += chunkSize) {
+    chunks.push(items.slice(index, index + chunkSize));
+  }
+  return chunks;
+}
+
 async function handleNotificationSend() {
   const titleInput = document.getElementById('notification-title');
   const descriptionInput = document.getElementById('notification-description');
-  const feedback = document.getElementById('notification-feedback');
   const sendBtn = document.getElementById('notification-send-btn');
 
   if (!titleInput || !descriptionInput) {
@@ -116,38 +157,111 @@ async function handleNotificationSend() {
   const description = descriptionInput.value.trim();
 
   if (!title || !description) {
-    alert('Please enter both title and description.');
+    await showNotificationAlert({
+      icon: 'warning',
+      title: 'Missing Information',
+      text: 'Please enter both title and description.',
+      backdrop: 'rgba(105, 108, 255, 0.1)'
+    });
     return;
   }
 
   if (typeof db === 'undefined') {
-    alert('Database not available.');
+    await showNotificationAlert({
+      icon: 'error',
+      title: 'Database Error',
+      text: 'Database not available.',
+      backdrop: 'rgba(105, 108, 255, 0.1)'
+    });
     return;
   }
 
   if (sendBtn) sendBtn.disabled = true;
 
   try {
-    await db.collection('notifications').add({
-      title,
-      description,
-      type: 'PROMO',
-      userId: 'ALL',
-      timestamp: Date.now()
-    });
+    if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+      Swal.fire({
+        title: 'Sending Notifications',
+        text: 'SYSTEM notification is being sent to all users.',
+        allowOutsideClick: false,
+        backdrop: 'rgba(105, 108, 255, 0.1)',
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+    }
+
+    const usersSnapshot = await db.collection('users').get();
+    const userDocumentIds = usersSnapshot.docs.map(doc => doc.id).filter(Boolean);
+
+    if (!userDocumentIds.length) {
+      if (typeof Swal !== 'undefined' && typeof Swal.close === 'function') {
+        Swal.close();
+      }
+
+      await showNotificationAlert({
+        icon: 'info',
+        title: 'No Users Found',
+        text: 'There are no users in the users collection.',
+        backdrop: 'rgba(105, 108, 255, 0.1)'
+      });
+      return;
+    }
+
+    let nextSequence = await getNextNotificationSequence();
+    let createdCount = 0;
+    const userChunks = chunkArray(userDocumentIds, 400);
+
+    for (const chunk of userChunks) {
+      const batch = db.batch();
+
+      chunk.forEach(userDocumentId => {
+        const notificationId = buildNotificationId(nextSequence);
+        const notificationRef = db.collection('notifications').doc(notificationId);
+
+        batch.set(notificationRef, {
+          id: notificationId,
+          title,
+          description,
+          type: 'SYSTEM',
+          userId: userDocumentId,
+          timestamp: Date.now() + createdCount
+        });
+
+        nextSequence += 1;
+        createdCount += 1;
+      });
+
+      await batch.commit();
+    }
 
     titleInput.value = '';
     descriptionInput.value = '';
 
-    if (feedback) {
-      feedback.classList.remove('d-none');
-      setTimeout(() => feedback.classList.add('d-none'), 2500);
+    if (typeof Swal !== 'undefined' && typeof Swal.close === 'function') {
+      Swal.close();
     }
 
-    loadNotificationsFromFirestore();
+    await loadNotificationsFromFirestore();
+    await showNotificationAlert({
+      icon: 'success',
+      title: 'Notifications Sent',
+      text: `SYSTEM notification sent to ${createdCount} users.`,
+      backdrop: 'rgba(105, 108, 255, 0.1)'
+    });
   } catch (err) {
     console.error('Failed to send notification:', err);
-    alert('Failed to send notification. Please try again.');
+
+    if (typeof Swal !== 'undefined' && typeof Swal.close === 'function') {
+      Swal.close();
+    }
+
+    await showNotificationAlert({
+      icon: 'error',
+      title: 'Send Failed',
+      text: 'Failed to send notification. Please try again.',
+      backdrop: 'rgba(105, 108, 255, 0.1)'
+    });
   } finally {
     if (sendBtn) sendBtn.disabled = false;
   }
@@ -156,8 +270,10 @@ async function handleNotificationSend() {
 function showNotificationDesc(title, description) {
   const modalTitle = document.getElementById('notificationDescModalTitle');
   const modalBody = document.getElementById('notificationDescModalBody');
-  if (modalTitle) modalTitle.textContent = title;
-  if (modalBody) modalBody.textContent = description;
+  const decodedTitle = decodeURIComponent(title || 'Notification');
+  const decodedDescription = decodeURIComponent(description || '-');
+  if (modalTitle) modalTitle.textContent = decodedTitle;
+  if (modalBody) modalBody.textContent = decodedDescription;
   const modal = document.getElementById('notificationDescModal');
   if (modal && window.bootstrap) {
     bootstrap.Modal.getOrCreateInstance(modal).show();
