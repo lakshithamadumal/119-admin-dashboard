@@ -19,7 +19,6 @@ async function renderSosDetailsPage(docId) {
         setTextById('detail-user-phone', user.phoneNumber || '-');
         setTextById('detail-user-address', user.address || '-');
         setTextById('detail-user-nic', user.nicNumber || '-');
-        setTextById('detail-user-registered', 'Verified User');
 
         setTextById('detail-medical-blood', user.bloodGroup || '-');
         setTextById('detail-medical-allergies', user.allergies || '-');

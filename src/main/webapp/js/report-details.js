@@ -13,7 +13,8 @@ async function renderReportDetailsPage(docId) {
         setTextById('detail-report-status', report.status || 'Received');
         setTextById('detail-report-latitude', report.latitude || '-');
         setTextById('detail-report-longitude', report.longitude || '-');
-        setTextById('detail-report-description', report.message || '-'); // message -> description
+        setTextById('detail-report-description', report.message || '-');
+        setTextById('detail-report-created', report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : '-');
 
         const priorityBadge = document.getElementById('detail-report-priority');
         if (priorityBadge) {
