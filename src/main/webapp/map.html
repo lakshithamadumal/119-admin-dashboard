@@ -175,6 +175,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <script src="js/map-listener.js"></script>
     <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoibGFreTIwMDMiLCJhIjoiY21sbmdpdXE4MHNsdDNlcHVkb2FtYWQ0ZiJ9.Nj48QIGZ9wSy8Zuw7NEUjQ';
 
@@ -310,34 +311,35 @@
           throw new Error('Firestore is not initialized.');
         }
 
-        const snapshot = await db.collection('reports').get();
         const records = [];
+        const collections = ['reports', 'emergency_reports'];
 
-        snapshot.forEach((doc) => {
-          const data = doc.data() || {};
-          const coordinates = getReportCoordinates(data);
-          if (coordinates.latitude === null || coordinates.longitude === null) {
-            return;
-          }
+        for (const colName of collections) {
+          const snapshot = await db.collection(colName).get();
+          snapshot.forEach((doc) => {
+            const data = doc.data() || {};
+            const coordinates = getReportCoordinates(data);
+            if (coordinates.latitude === null || coordinates.longitude === null) {
+              return;
+            }
 
-          records.push({
-            docId: doc.id,
-            source: 'reports',
-            reportId: data.reportId || doc.id,
-            category: data.categoryName || data.category || '-',
-            severity: data.severity || data.priority || 'Low',
-            status: data.status || 'Received',
-            createdAt: getTimestampLabel(data.timestamp),
-            address: getReportAddress(data),
-            latitude: coordinates.latitude,
-            longitude: coordinates.longitude
+            records.push({
+              docId: doc.id,
+              source: colName,
+              reportId: data.reportId || doc.id,
+              category: data.categoryName || data.category || '-',
+              severity: data.severity || data.priority || 'low',
+              status: data.status || 'Received',
+              createdAt: getTimestampLabel(data.timestamp),
+              address: getReportAddress(data),
+              latitude: coordinates.latitude,
+              longitude: coordinates.longitude
+            });
           });
-        });
+        }
 
         return records;
       }
-
-      // Removed emergency_reports and fallback logic; only reports collection is used.
 
       async function initMap() {
         const params = new URLSearchParams(window.location.search);
@@ -455,6 +457,9 @@
           map.setCenter(defaultCenter);
           map.setZoom(defaultZoom);
         }
+
+        // Initialize real-time listener for new reports
+        initMapRealtimeListener(map);
       }
 
       initMap();
