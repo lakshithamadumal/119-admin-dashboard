@@ -91,9 +91,10 @@ function initializePageScripts(pageName) {
 
   switch (pageName) {
     case 'reports':
-      renderReportsTable('reports-table-body', reportsData);
-      initializeReportsModule();
-      break;
+    if (typeof initializeReportsModule === 'function') {
+        initializeReportsModule();
+    } 
+    break;
     case 'users':
     if (typeof initializeUsersModule === 'function') {
         initializeUsersModule();
