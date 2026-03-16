@@ -82,16 +82,25 @@ function renderNotificationsTable(targetId, data) {
     return;
   }
 
-  tableBody.innerHTML = data.map(notification => `
+  tableBody.innerHTML = data.map(notification => {
+    const safeDesc = escapeHtml(notification.description || '-');
+    const safeTitle = escapeHtml(notification.title);
+    return `
     <tr>
       <td>${escapeHtml(notification.id)}</td>
       <td>${escapeHtml(notification.userId)}</td>
-      <td>${escapeHtml(notification.title)}</td>
+      <td>${safeTitle}</td>
       <td>${buildBadge(escapeHtml(notification.type), badgeFromNotificationType(notification.type))}</td>
-      <td class="text-wrap" style="min-width: 260px;">${escapeHtml(notification.description || '-')}</td>
       <td>${escapeHtml(notification.timestamp)}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary"
+          onclick="showNotificationDesc('${safeTitle}', '${safeDesc}')">
+          View
+        </button>
+      </td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 }
 
 async function handleNotificationSend() {
@@ -142,6 +151,17 @@ async function handleNotificationSend() {
     alert('Failed to send notification. Please try again.');
   } finally {
     if (sendBtn) sendBtn.disabled = false;
+  }
+}
+
+function showNotificationDesc(title, description) {
+  const modalTitle = document.getElementById('notificationDescModalTitle');
+  const modalBody = document.getElementById('notificationDescModalBody');
+  if (modalTitle) modalTitle.textContent = title;
+  if (modalBody) modalBody.textContent = description;
+  const modal = document.getElementById('notificationDescModal');
+  if (modal && window.bootstrap) {
+    bootstrap.Modal.getOrCreateInstance(modal).show();
   }
 }
 
