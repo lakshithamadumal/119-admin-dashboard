@@ -3,7 +3,7 @@ document.getElementById('logoutBtn').addEventListener('click', function (e) {
 
     Swal.fire({
         title: 'Are you sure?',
-        text: "You will be logged out from the session!",
+        text: "You will be logged out from the dashboard!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
@@ -11,13 +11,10 @@ document.getElementById('logoutBtn').addEventListener('click', function (e) {
         confirmButtonText: 'Yes, Logout!'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch('logout')
-                .then(response => response.text())
-                .then(data => {
-                    if (data === 'success') {
-                        window.location.href = 'login.html';
-                    }
-                });
+            localStorage.removeItem("adminLoggedIn");
+            localStorage.removeItem("adminEmail");
+
+            window.location.href = 'login.html';
         }
     });
 });

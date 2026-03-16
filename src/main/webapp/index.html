@@ -45,6 +45,14 @@
                 background: rgba(105, 108, 255, 0.1) !important;
             }
         </style>
+        <script>
+        (function() {
+              const isLoggedIn = localStorage.getItem("adminLoggedIn");
+          if (isLoggedIn !== "true" && !window.location.pathname.includes("login.html")) {
+               window.location.href = "login.html";
+            }
+        })();
+        </script>
     </head>
     <body>
         <audio id="sos-audio" src="assets/alert/emergency-sound.mp3" preload="auto"></audio>

@@ -1,97 +1,56 @@
 document.addEventListener("DOMContentLoaded", function () {
-
     const form = document.getElementById("formAuthentication");
 
-    form.addEventListener("submit", function (e) {
+    form.addEventListener("submit", async function (e) {
         e.preventDefault();
 
         const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
 
         if (email === "" || password === "") {
-
-            Swal.fire({
-                icon: "warning",
-                title: "Missing Information",
-                text: "Please enter both email and password."
-            });
-
+            Swal.fire({ icon: "warning", title: "Missing Info", text: "Please enter both email and password." });
             return;
         }
 
         const btn = form.querySelector("button[type='submit']");
-        const originalText = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>`;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>`;
 
-        const formData = new URLSearchParams(new FormData(form));
+        try {
+            const snapshot = await db.collection("admins").where("email", "==", email).get();
 
-        fetch("login-auth", {
-            method: "POST",
-            body: formData,
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
+            if (!snapshot.empty) {
+                const adminData = snapshot.docs[0].data();
+
+                if (adminData.password === password) {
+                    localStorage.setItem("adminLoggedIn", "true");
+                    localStorage.setItem("adminEmail", email);
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "Login Successful",
+                        text: "Redirecting to Dashboard...",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = "index.html";
+                    });
+                } else {
+                    throw new Error("invalid_password");
+                }
+            } else {
+                throw new Error("user_not_found");
             }
-        })
-        .then(response => response.text())
-        .then(data => {
+        } catch (error) {
             btn.disabled = false;
-            btn.innerHTML = originalText;
-
-            if (data.trim() === "success") {
-
-                Swal.fire({
-                    icon: "success",
-                    title: "Login Successful",
-                    text: "Redirecting to Dashboard...",
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    window.location.href = "index.html";
-                });
-
-            } 
-            else if (data.trim() === "invalid_password") {
-
-                Swal.fire({
-                    icon: "error",
-                    title: "Invalid Password",
-                    text: "Please check your password and try again."
-                });
-
-            } 
-            else if (data.trim() === "user_not_found") {
-
-                Swal.fire({
-                    icon: "warning",
-                    title: "User Not Found",
-                    text: "The email you entered does not exist."
-                });
-
-            } 
-            else {
-
-                Swal.fire({
-                    icon: "error",
-                    title: "Server Error",
-                    text: "Something went wrong on the server!"
-                });
-
-            }
-
-        })
-        .catch(() => {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-
-            Swal.fire({
-                icon: "error",
-                title: "Connection Error",
-                text: "Cannot connect to the server. Please check your network."
-            });
-
-        });
-
+            btn.innerHTML = "Login";
+            console.error(error);
+            
+            let msg = "An error occurred. Please try again.";
+            if (error.message === "invalid_password") msg = "Incorrect password!";
+            if (error.message === "user_not_found") msg = "Admin email not found!";
+            
+            Swal.fire({ icon: "error", title: "Login Failed", text: msg });
+        }
     });
-
 });
