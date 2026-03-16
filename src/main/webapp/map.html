@@ -258,22 +258,28 @@
         };
       }
 
+      function getReportAddress(report) {
+        const candidates = [
+          report.address,
+          report.Address,
+          report.location && report.location.address,
+          report.locationAddress,
+          report.addressText
+        ];
+
+        for (const candidate of candidates) {
+          if (typeof candidate === 'string' && candidate.trim()) {
+            return candidate.trim();
+          }
+        }
+
+        return '-';
+      }
+
       function buildPopupContent(report) {
         const safeDocId = encodeURIComponent(String(report.docId));
         const googleMapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(`${report.latitude},${report.longitude}`)}`;
-        let locationText = '-';
-        let debugInfo = '';
-        // Try address (case-insensitive), Address, location.address
-        if (typeof report.address === 'string' && report.address.trim()) {
-          locationText = report.address;
-        } else if (typeof report.Address === 'string' && report.Address.trim()) {
-          locationText = report.Address;
-        } else if (report.location && typeof report.location.address === 'string' && report.location.address.trim()) {
-          locationText = report.location.address;
-        } else if (report.latitude != null && report.longitude != null) {
-          locationText = `${report.latitude.toFixed(5)}, ${report.longitude.toFixed(5)}`;
-        }
-        debugInfo = `<div style='font-size:10px;color:#888;margin-top:2px;'>address type: ${typeof report.address}, value: ${JSON.stringify(report.address)}</div>`;
+        const locationText = getReportAddress(report);
         return `
           <div class="info-window">
             <h3>${escapeHtml(report.reportId || report.docId)}</h3>
@@ -282,7 +288,6 @@
             <p><strong>Status:</strong> ${escapeHtml(report.status)}</p>
             <p><strong>Created:</strong> ${escapeHtml(report.createdAt)}</p>
             <p><strong>Location:</strong> ${escapeHtml(locationText)}</p>
-            ${debugInfo}
             <a href="report-details.html?reportId=${safeDocId}">View Report</a>
             <a href="${googleMapsUrl}" target="_blank" rel="noopener">Open Google Maps</a>
           </div>
@@ -312,6 +317,7 @@
             severity: data.severity || data.priority || 'Low',
             status: data.status || 'Received',
             createdAt: getTimestampLabel(data.timestamp),
+            address: getReportAddress(data),
             latitude: coordinates.latitude,
             longitude: coordinates.longitude
           });
