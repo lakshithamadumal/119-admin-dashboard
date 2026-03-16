@@ -205,13 +205,21 @@
         <script src="assets/vendor/libs/jquery/jquery.js"></script>
         <script src="assets/vendor/libs/popper/popper.js"></script>
         <script src="assets/vendor/js/bootstrap.js"></script>
+                <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+                <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+                <script src="js/firebase-config.js"></script>
         <script src="js/utils.js"></script>
         <script src="js/data.js"></script>
         <script src="js/sos-details.js"></script>
         <script>
       const sosId = new URLSearchParams(window.location.search).get('sosId');
-      if (sosId) {
-        renderSosDetailsPage(parseInt(sosId, 10));
+            if (sosId && sosId.trim()) {
+                renderSosDetailsPage(sosId.trim());
+            } else {
+                const detailsContent = document.getElementById('sos-details-content');
+                if (detailsContent) {
+                    detailsContent.innerHTML = '<div class="alert alert-warning">Missing SOS id. Please open this page from the SOS list.</div>';
+                }
       }
         </script>
     </body>

@@ -1,64 +1,51 @@
-/**
- * SOS alerts page module.
- * Depends on: js/utils.js, js/data.js
- */
 
-function renderSosTable(targetId, data) {
-  const tableBody = document.getElementById(targetId);
-  if (!tableBody) return;
+async function fetchSosAlerts() {
+    const tbody = document.getElementById('sos-table-body');
+    if (!tbody) return;
 
-  if (!data.length) {
-    tableBody.innerHTML = buildEmptyTableRow(5, 'No SOS records available. Load SOS data into js/data.js or your API response first.');
-    return;
-  }
+    try {
+        console.log("Fetching SOS alerts from Firestore...");
+        const snapshot = await db.collection('emergency_reports').orderBy('timestamp', 'desc').get();
+        tbody.innerHTML = '';
 
-  tableBody.innerHTML = data.map(sos => {
-    const user = usersData.find(item => item.id === sos.userId);
-    const userName = user ? user.name : sos.userId;
-    const userContact = user ? user.phone : '-';
+        if (snapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No SOS records found.</td></tr>';
+            return;
+        }
 
-    return `
-      <tr>
-        <td>${sos.sosId}</td>
-        <td>${userName}</td>
-        <td>${userContact}</td>
-        <td>${sos.createdDate}</td>
-        <td>
-          <a class="btn btn-sm btn-info" target="_blank" href="sos-details.html?sosId=${sos.id}">
-            <i class="ri ri-alarm-warning-fill me-1"></i>View Report
-          </a>
-        </td>
-      </tr>`;
-  }).join('');
+        const userSnap = await db.collection('users').get();
+        const userMap = {};
+        userSnap.forEach(u => userMap[u.id] = u.data());
+
+        const detailsPagePath = window.location.pathname.replace(/\\/g, '/').includes('/pages/')
+            ? '../sos-details.html'
+            : 'sos-details.html';
+
+        snapshot.forEach(doc => {
+            const sos = doc.data();
+            const docId = doc.id;
+            const user = userMap[sos.userId] || {};
+
+            const createdDate = sos.timestamp?.toDate ? sos.timestamp.toDate().toLocaleString() : new Date(sos.timestamp).toLocaleString();
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${sos.reportId || docId.substring(0, 8)}</td>
+                    <td>${user.name || 'Unknown User'}</td>
+                    <td>${user.phoneNumber || '-'}</td>
+                    <td>${createdDate}</td>
+                    <td>
+                        <a class="btn btn-sm btn-info" href="${detailsPagePath}?sosId=${encodeURIComponent(docId)}">
+                            <i class="ri ri-alarm-warning-fill me-1"></i>View Details
+                        </a>
+                    </td>
+                </tr>`;
+        });
+    } catch (error) {
+        console.error("Error loading SOS:", error);
+    }
 }
 
 function initializeSosModule() {
-  const searchInput = document.getElementById('sos-search');
-  const statusFilter = document.getElementById('sos-status-filter');
-
-  function applyFilters() {
-    const query = searchInput ? searchInput.value.toLowerCase() : '';
-    const status = statusFilter ? statusFilter.value : '';
-
-    const filtered = sosData.filter(sos => {
-      const user = usersData.find(item => item.id === sos.userId);
-      const userName = user ? user.name.toLowerCase() : '';
-      const userPhone = user ? user.phone.toLowerCase() : '';
-
-      const matchesSearch = !query ||
-        sos.sosId.toLowerCase().includes(query) ||
-        sos.userId.toLowerCase().includes(query) ||
-        sos.category.toLowerCase().includes(query) ||
-        userName.includes(query) ||
-        userPhone.includes(query);
-
-      const matchesStatus = !status || sos.status === status;
-      return matchesSearch && matchesStatus;
-    });
-
-    renderSosTable('sos-table-body', filtered);
-  }
-
-  if (searchInput) searchInput.addEventListener('input', applyFilters);
-  if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+    fetchSosAlerts();
 }

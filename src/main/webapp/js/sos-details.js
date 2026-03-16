@@ -1,75 +1,49 @@
-/**
- * SOS Details standalone page module.
- * Used by: sos-details.html
- * Depends on: js/utils.js, js/data.js
- */
 
-function sosDetailViewMap() {
-  const lat = (document.getElementById('sos-detail-latitude') || {}).value || '';
-  const lng = (document.getElementById('sos-detail-longitude') || {}).value || '';
-  const id  = (document.getElementById('sos-detail-id') || {}).value || '';
-  const pri = (document.getElementById('sos-detail-priority') || {}).textContent || '';
-  if (!lat || !lng) { alert('Location data not available.'); return; }
-  window.open(
-    `map.html?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&sosId=${encodeURIComponent(id)}&priority=${encodeURIComponent(pri)}`,
-    '_blank', 'noopener'
-  );
-}
+async function renderSosDetailsPage(docId) {
+    if (!docId) return;
 
-function sosDetailCopyLocation() {
-  const lat = (document.getElementById('sos-detail-latitude') || {}).value || '';
-  const lng = (document.getElementById('sos-detail-longitude') || {}).value || '';
-  if (!lat || !lng) { alert('Location data not available.'); return; }
-  copyTextToClipboard(`https://www.google.com/maps?q=${lat},${lng}`);
-}
+    try {
+        const sosDoc = await db.collection('emergency_reports').doc(docId).get();
+        if (!sosDoc.exists) return alert("SOS record not found!");
+        const sos = sosDoc.data();
 
-function renderSosDetailsPage(sosId) {
-  const sos = sosData.find(item => item.id === sosId);
-  if (!sos) return;
+        const userDoc = await db.collection('users').doc(sos.userId).get();
+        const user = userDoc.exists ? userDoc.data() : {};
 
-  const user = usersData.find(item => item.id === sos.userId);
-  const membership = membershipsData.find(item => item.userId === sos.userId);
-  const payment = getLatestPaymentForUser(sos.userId);
-  const medical = medicalInfoData.find(item => item.userId === sos.userId);
-  const userReports = reportsData.filter(item => item.userId === sos.userId);
+        setTextById('sos-detail-id', sos.reportId || docId);
+        const createdDate = sos.timestamp?.toDate ? sos.timestamp.toDate().toLocaleString() : new Date(sos.timestamp).toLocaleString();
+        setTextById('sos-detail-created', createdDate);
 
-  // SOS summary fields
-  setTextById('sos-detail-id', sos.sosId);
-  setTextById('sos-detail-created', sos.createdDate || '-');
+        setTextById('detail-user-name', user.name || '-');
+        setTextById('detail-user-email', user.email || '-');
+        setTextById('detail-user-phone', user.phoneNumber || '-');
+        setTextById('detail-user-address', user.address || '-');
+        setTextById('detail-user-nic', user.nicNumber || '-');
+        setTextById('detail-user-registered', 'Verified User');
 
-  // User fields
-  setTextById('detail-user-name', user ? user.name : '-');
-  setTextById('detail-user-email', user ? user.email : '-');
-  setTextById('detail-user-phone', user ? user.phone : '-');
-  setTextById('detail-user-registered', user ? user.createdDate : '-');
-  setTextById('detail-user-address', user ? (user.address || '-') : '-');
-  setTextById('detail-user-nic', user ? (user.nic || '-') : '-');
+        setTextById('detail-medical-blood', user.bloodGroup || '-');
+        setTextById('detail-medical-allergies', user.allergies || '-');
+        setTextById('detail-medical-conditions', user.medicalConditions || '-');
+        setTextById('detail-medical-medications', user.currentMedications || '-');
 
-  // Medical fields
-  setTextById('detail-medical-blood', medical ? medical.bloodGroup : '-');
-  setTextById('detail-medical-allergies', medical ? medical.allergies : '-');
-  setTextById('detail-medical-conditions', medical ? medical.conditions : '-');
-  setTextById('detail-medical-medications', medical ? (medical.currentMedications || '-') : '-');
+        setTextById('detail-subscription-status', user.paymentStatus || 'Inactive');
+        if (user.expiryDate) {
+            setTextById('detail-subscription-expiry', new Date(user.expiryDate).toLocaleDateString());
+        }
 
-  // Subscription fields
-  setTextById('detail-subscription-status', membership ? membership.status : (payment ? payment.status : '-'));
-  setTextById('detail-subscription-expiry', membership ? membership.expireDate : '-');
+        setTextById('detail-ec1-name', user.emergencyNick1 || 'Contact 1');
+        setTextById('detail-ec1-phone', user.emergencyContact1 || '-');
+        setTextById('detail-ec2-name', user.emergencyNick2 || 'Contact 2');
+        setTextById('detail-ec2-phone', user.emergencyContact2 || '-');
 
-  // Contact fields
-  setTextById('detail-ec1-name', medical ? (medical.emergencyContact1Name || '-') : '-');
-  setTextById('detail-ec1-phone', medical ? (medical.emergencyContact1Phone || '-') : '-');
-  setTextById('detail-ec2-name', medical ? (medical.emergencyContact2Name || '-') : '-');
-  setTextById('detail-ec2-phone', medical ? (medical.emergencyContact2Phone || '-') : '-');
+        const mediaContainer = document.getElementById('detail-media-image');
+        if (sos.imageUrl || user.profilePicUrl) {
+            mediaContainer.innerHTML = `<img src="${sos.imageUrl || user.profilePicUrl}" class="img-fluid rounded border shadow-sm">`;
+        } else {
+            mediaContainer.textContent = 'No image attached';
+        }
 
-  // Media fields
-  const mediaImageContainer = document.getElementById('detail-media-image');
-  if (mediaImageContainer) {
-    const userReportIds = userReports.map(item => item.reportId);
-    const userMedia = reportMediaData.find(item => userReportIds.includes(item.reportId) && item.image);
-    if (userMedia && userMedia.image) {
-      mediaImageContainer.innerHTML = `<img src="${userMedia.image}" alt="SOS related image" class="img-fluid rounded">`;
-    } else {
-      mediaImageContainer.textContent = 'No image attached';
+    } catch (error) {
+        console.error("Error loading SOS details:", error);
     }
-  }
 }

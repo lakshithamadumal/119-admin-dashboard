@@ -116,10 +116,9 @@ function initializePageScripts(pageName) {
     case 'payments':
       renderPaymentsTable('payments-table-body', paymentsData);
       break;
-    case 'sos':
-      renderSosTable('sos-table-body', sosData);
-      initializeSosModule();
-      break;
+case 'sos':
+    initializeSosModule();
+    break;
     default:
       break;
   }
