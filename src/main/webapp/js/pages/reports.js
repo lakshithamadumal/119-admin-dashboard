@@ -48,7 +48,7 @@ async function fetchReports() {
                     <td><span class="badge bg-label-${statusTone}">${safeStatus}</span></td>
                     <td>${createdDate}</td>
                     <td>
-                        <button class="btn btn-sm btn-info" onclick="openReportDetails('${docId}')">Inspect</button>
+                        <button class="btn btn-sm btn-info" target="_blank" onclick="openReportDetails('${docId}')">Inspect</button>
                     </td>
                 </tr>`;
         });

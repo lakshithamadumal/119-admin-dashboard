@@ -35,7 +35,7 @@ async function fetchSosAlerts() {
                     <td>${user.phoneNumber || '-'}</td>
                     <td>${createdDate}</td>
                     <td>
-                        <a class="btn btn-sm btn-info" href="${detailsPagePath}?sosId=${encodeURIComponent(docId)}">
+                        <a class="btn btn-sm btn-info" target="_blank" href="${detailsPagePath}?sosId=${encodeURIComponent(docId)}">
                             <i class="ri ri-alarm-warning-fill me-1"></i>View Details
                         </a>
                     </td>

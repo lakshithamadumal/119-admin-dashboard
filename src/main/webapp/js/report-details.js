@@ -1,16 +1,13 @@
 async function renderReportDetailsPage(docId) {
     if (!docId) return;
     try {
-        // 1. Report දත්ත Firestore එකෙන් (docId = report එකේ ID එක)
         const reportDoc = await db.collection('reports').doc(docId).get();
         if (!reportDoc.exists) return;
         const report = reportDoc.data();
 
-        // 2. User දත්ත (report එකේ 'uid' field එකේ තියෙන rUyXX... පාවිච්චි කරලා)
         const userDoc = await db.collection('users').doc(report.uid).get();
         const user = userDoc.exists ? userDoc.data() : {};
 
-        // --- Report Fields මැප් කිරීම ---
         setTextById('detail-report-id', report.reportId || docId);
         setTextById('detail-report-category', report.categoryName || '-');
         setTextById('detail-report-status', report.status || 'Received');
@@ -24,7 +21,6 @@ async function renderReportDetailsPage(docId) {
             priorityBadge.className = `badge bg-label-${badgeFromPriority(report.severity)}`;
         }
 
-        // --- User Fields ---
         setTextById('detail-user-name', user.name || '-');
         setTextById('detail-user-email', user.email || '-');
         setTextById('detail-user-phone', user.phoneNumber || '-');
@@ -32,14 +28,11 @@ async function renderReportDetailsPage(docId) {
         setTextById('detail-user-address', user.address || '-');
         setTextById('detail-user-total-reports', user.totalReports || '0');
 
-        // --- Media (Image 0 එක ගමු) ---
         const mediaImage = document.getElementById('detail-media-image');
         if (mediaImage && report.imageUrls && report.imageUrls.length > 0) {
             mediaImage.innerHTML = `<img src="${report.imageUrls[0]}" class="img-fluid rounded border">`;
         }
 
-        // --- Timeline Logic ---
-        // Firestore එකේ තියෙන timestamps වලින් Timeline එක පුරවමු
         const history = {
             Received: report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : "-",
             Assigned: report.assignedTimestamp?.toDate ? report.assignedTimestamp.toDate().toLocaleString() : "-",
