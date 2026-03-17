@@ -13,6 +13,7 @@ let activeReportSeverity = 'Low';
 let activeReportLatitude = null;
 let activeReportLongitude = null;
 let activeReportUserId = null;
+let activeReportDescription = '-';
 let activeStatusHistory = {
     Received: '-',
     Assigned: '-',
@@ -65,13 +66,14 @@ async function renderReportDetailsPage(docId) {
         activeReportSeverity = report.severity || report.priority || 'Low';
         activeReportLatitude = coordinates.latitude;
         activeReportLongitude = coordinates.longitude;
+        activeReportDescription = String(report.message || report.description || '').trim() || '-';
 
         setTextById('detail-report-id', activeReportPublicId);
         setTextById('detail-report-category', report.categoryName || '-');
         setTextById('detail-report-status', report.status || 'Received');
         setTextById('detail-report-latitude', coordinates.latitude !== null ? coordinates.latitude : '-');
         setTextById('detail-report-longitude', coordinates.longitude !== null ? coordinates.longitude : '-');
-        setTextById('detail-report-description', report.message || report.description || '-');
+        setTextById('detail-report-description', activeReportDescription || '-');
         setTextById('detail-report-created', report.timestamp?.toDate ? report.timestamp.toDate().toLocaleString() : '-');
         setTextById('detail-report-address', report.address || '-');
 
@@ -444,6 +446,8 @@ async function sendStatusNotification(status) {
     const config = notificationConfig[status];
     if (!config) return;
 
+    const descriptionToSend = config.description;
+
     // Get next sequence number
     const snapshot = await db.collection('notifications').get();
     let maxSequence = 0;
@@ -458,9 +462,51 @@ async function sendStatusNotification(status) {
     await db.collection('notifications').doc(notificationId).set({
         id: notificationId,
         title: config.title,
-        description: config.description,
+        description: descriptionToSend,
         type: 'REPORT',
         userId: activeReportUserId,
         timestamp: Date.now()
     });
+
+    const pushResult = await dispatchStatusPushNotification(config.title, descriptionToSend, activeReportUserId);
+    if (!pushResult.success) {
+        console.warn('[Notification] push delivery failed:', pushResult.message);
+    }
+}
+
+async function dispatchStatusPushNotification(title, description, userId) {
+    try {
+        const response = await fetch('send-notification-campaign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title,
+                description,
+                type: 'REPORT',
+                userId
+            })
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload.success === false) {
+            return {
+                success: false,
+                message: payload.message || 'Push request failed.'
+            };
+        }
+
+        return {
+            success: true,
+            sentCount: Number(payload.sentCount || 0),
+            totalTokens: Number(payload.totalTokens || 0)
+        };
+    } catch (err) {
+        console.error('Push delivery error:', err);
+        return {
+            success: false,
+            message: 'Push service is not reachable.'
+        };
+    }
 }

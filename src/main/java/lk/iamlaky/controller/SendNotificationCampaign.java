@@ -69,6 +69,7 @@ public class SendNotificationCampaign extends HttpServlet {
         String title = getString(requestBody, "title");
         String description = getString(requestBody, "description");
         String type = getString(requestBody, "type");
+        String userId = getString(requestBody, "userId");
         if (type.isBlank()) { type = "SYSTEM"; }
 
         if (title.isBlank() || description.isBlank()) {
@@ -84,12 +85,20 @@ public class SendNotificationCampaign extends HttpServlet {
         }
 
         try {
-            // 💡 ටෝකන් කීයක් එනවද කියලා බලන්න ලොග් එකක් දාමු
-            QuerySnapshot usersSnapshot = db.collection("users").get().get();
             Set<String> uniqueTokens = new LinkedHashSet<>();
 
-            for (DocumentSnapshot userDoc : usersSnapshot.getDocuments()) {
-                collectTokens(userDoc.getData(), uniqueTokens);
+            if (!userId.isBlank()) {
+                DocumentSnapshot targetUser = db.collection("users").document(userId).get().get();
+                if (targetUser.exists()) {
+                    collectTokens(targetUser.getData(), uniqueTokens);
+                } else {
+                    System.out.println("DEBUG: Target user not found for userId=" + userId);
+                }
+            } else {
+                QuerySnapshot usersSnapshot = db.collection("users").get().get();
+                for (DocumentSnapshot userDoc : usersSnapshot.getDocuments()) {
+                    collectTokens(userDoc.getData(), uniqueTokens);
+                }
             }
 
             List<String> tokens = new ArrayList<>(uniqueTokens);
@@ -112,6 +121,7 @@ public class SendNotificationCampaign extends HttpServlet {
                         .putData("title", title)
                         .putData("description", description)
                         .putData("type", type)
+                        .putData("userId", userId.isBlank() ? "ALL" : userId)
                         .setAndroidConfig(AndroidConfig.builder()
                                 .setPriority(AndroidConfig.Priority.HIGH)
                                 .setNotification(AndroidNotification.builder()
@@ -136,6 +146,7 @@ public class SendNotificationCampaign extends HttpServlet {
             responseBody.addProperty("totalTokens", tokens.size());
             responseBody.addProperty("sentCount", successCount);
             responseBody.addProperty("failedCount", failureCount);
+            responseBody.addProperty("targetUserId", userId.isBlank() ? "ALL" : userId);
             responseBody.addProperty("message", "Processed successfully");
 
             resp.setStatus(HttpServletResponse.SC_OK);
