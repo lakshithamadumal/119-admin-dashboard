@@ -12,6 +12,7 @@ let activeReportPublicId = null;
 let activeReportSeverity = 'Low';
 let activeReportLatitude = null;
 let activeReportLongitude = null;
+let activeReportUserId = null;
 let activeStatusHistory = {
     Received: '-',
     Assigned: '-',
@@ -33,6 +34,7 @@ async function renderReportDetailsPage(docId) {
         activeReportDocId = resolved.docId;
         const report = resolved.data;
         activeReportStatus = report.status || 'Received';
+        activeReportUserId = report.uid || report.userId || report.authUid || null;
 
         const userDoc = await db.collection('users').doc(report.uid).get();
         const user = userDoc.exists ? userDoc.data() : {};
@@ -390,6 +392,13 @@ async function setReportStatus(targetStatus) {
             activeStatusHistory[targetStatus] = now.toDate().toLocaleString();
         }
 
+        // Send notification to the report owner
+        try {
+            await sendStatusNotification(targetStatus);
+        } catch (notifErr) {
+            console.error('Notification send failed:', notifErr);
+        }
+
         updateStatusTimelineUI(activeReportStatus, activeStatusHistory);
         updateStatusActionButtons(activeReportStatus);
 
@@ -400,4 +409,58 @@ async function setReportStatus(targetStatus) {
     } finally {
         updateStatusActionButtons(activeReportStatus);
     }
+}
+
+async function sendStatusNotification(status) {
+    console.log('[Notification] sendStatusNotification called. status:', status, 'userId:', activeReportUserId);
+
+    if (typeof db === 'undefined') {
+        console.error('[Notification] Firestore db is not defined.');
+        return;
+    }
+
+    if (!activeReportUserId) {
+        console.error('[Notification] activeReportUserId is null — report.uid / report.userId field missing.');
+        return;
+    }
+
+    const reportRef = activeReportPublicId || activeReportDocId || '';
+
+    const notificationConfig = {
+        Assigned: {
+            title: 'Report Assigned',
+            description: `Your report ${reportRef} has been assigned to an emergency response officer.`
+        },
+        'In Progress': {
+            title: 'Response In Progress',
+            description: `Emergency responders are currently handling your report ${reportRef}.`
+        },
+        Completed: {
+            title: 'Response Completed',
+            description: `Your report ${reportRef} has been successfully resolved. Thank you for reporting.`
+        }
+    };
+
+    const config = notificationConfig[status];
+    if (!config) return;
+
+    // Get next sequence number
+    const snapshot = await db.collection('notifications').get();
+    let maxSequence = 0;
+    snapshot.forEach(doc => {
+        const data = doc.data() || {};
+        const numericPart = Number(String(data.id || doc.id).replace(/\D/g, ''));
+        if (!isNaN(numericPart)) maxSequence = Math.max(maxSequence, numericPart);
+    });
+
+    const notificationId = `#NTF-${String(maxSequence + 1).padStart(4, '0')}`;
+
+    await db.collection('notifications').doc(notificationId).set({
+        id: notificationId,
+        title: config.title,
+        description: config.description,
+        type: 'REPORT',
+        userId: activeReportUserId,
+        timestamp: Date.now()
+    });
 }
