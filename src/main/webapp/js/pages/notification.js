@@ -144,6 +144,45 @@ function chunkArray(items, chunkSize) {
   return chunks;
 }
 
+async function dispatchPushCampaign(title, description, type) {
+  try {
+    const response = await fetch('send-notification-campaign', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title,
+        description,
+        type: type || 'SYSTEM'
+      })
+    });
+
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok || payload.success === false) {
+      return {
+        success: false,
+        message: payload.message || 'Push campaign request failed.'
+      };
+    }
+
+    return {
+      success: true,
+      totalTokens: Number(payload.totalTokens || 0),
+      sentCount: Number(payload.sentCount || 0),
+      failedCount: Number(payload.failedCount || 0),
+      invalidTokenCount: Number(payload.invalidTokenCount || 0)
+    };
+  } catch (err) {
+    console.error('Push campaign error:', err);
+    return {
+      success: false,
+      message: 'Push campaign service is not reachable.'
+    };
+  }
+}
+
 async function handleNotificationSend() {
   const titleInput = document.getElementById('notification-title');
   const descriptionInput = document.getElementById('notification-description');
@@ -235,6 +274,8 @@ async function handleNotificationSend() {
       await batch.commit();
     }
 
+    const pushResult = await dispatchPushCampaign(title, description, 'SYSTEM');
+
     titleInput.value = '';
     descriptionInput.value = '';
 
@@ -243,12 +284,25 @@ async function handleNotificationSend() {
     }
 
     await loadNotificationsFromFirestore();
-    await showNotificationAlert({
-      icon: 'success',
-      title: 'Notifications Sent',
-      text: `SYSTEM notification sent to ${createdCount} users.`,
-      backdrop: 'rgba(105, 108, 255, 0.1)'
-    });
+    if (pushResult.success) {
+      const pushSummary = pushResult.totalTokens > 0
+        ? `Push delivered to ${pushResult.sentCount}/${pushResult.totalTokens} devices.`
+        : 'No registered device tokens found for push delivery.';
+
+      await showNotificationAlert({
+        icon: 'success',
+        title: 'Notifications Sent',
+        text: `SYSTEM notification saved for ${createdCount} users. ${pushSummary}`,
+        backdrop: 'rgba(105, 108, 255, 0.1)'
+      });
+    } else {
+      await showNotificationAlert({
+        icon: 'warning',
+        title: 'Saved, But Push Failed',
+        text: `Notifications were saved for ${createdCount} users, but push delivery failed: ${pushResult.message}`,
+        backdrop: 'rgba(105, 108, 255, 0.1)'
+      });
+    }
   } catch (err) {
     console.error('Failed to send notification:', err);
 

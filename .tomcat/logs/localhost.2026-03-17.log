@@ -1,0 +1,210 @@
+17-Mar-2026 14:54:42.929 SEVERE [http-nio-8080-exec-6] org.apache.catalina.core.ApplicationContext.log SendNotificationCampaign: Failed to send push notifications.
+	com.google.firebase.messaging.FirebaseMessagingException: Unexpected HTTP response with status: 404
+<!DOCTYPE html>
+<html lang=en>
+  <meta charset=utf-8>
+  <meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">
+  <title>Error 404 (Not Found)!!1</title>
+  <style>
+    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}
+  </style>
+  <a href=//www.google.com/><span id=logo aria-label=Google></span></a>
+  <p><b>404.</b> <ins>That’s an error.</ins>
+  <p>The requested URL <code>/batch</code> was not found on this server.  <ins>That’s all we know.</ins>
+
+		at com.google.firebase.messaging.FirebaseMessagingException.withMessagingErrorCode(FirebaseMessagingException.java:51)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl$MessagingErrorHandler.createException(FirebaseMessagingClientImpl.java:293)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl$MessagingErrorHandler.createException(FirebaseMessagingClientImpl.java:282)
+		at com.google.firebase.internal.AbstractHttpErrorHandler.handleHttpResponseException(AbstractHttpErrorHandler.java:57)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl.sendBatchRequest(FirebaseMessagingClientImpl.java:144)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl.sendAll(FirebaseMessagingClientImpl.java:118)
+		at com.google.firebase.messaging.FirebaseMessaging$4.execute(FirebaseMessaging.java:494)
+		at com.google.firebase.messaging.FirebaseMessaging$4.execute(FirebaseMessaging.java:491)
+		at com.google.firebase.internal.CallableOperation.call(CallableOperation.java:36)
+		at com.google.firebase.messaging.FirebaseMessaging.sendAll(FirebaseMessaging.java:376)
+		at com.google.firebase.messaging.FirebaseMessaging.sendMulticast(FirebaseMessaging.java:451)
+		at com.google.firebase.messaging.FirebaseMessaging.sendMulticast(FirebaseMessaging.java:423)
+		at lk.iamlaky.controller.SendNotificationCampaign.doPost(SendNotificationCampaign.java:123)
+		at javax.servlet.http.HttpServlet.service(HttpServlet.java:555)
+		at javax.servlet.http.HttpServlet.service(HttpServlet.java:623)
+		at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:197)
+		at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:142)
+		at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+		at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:166)
+		at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:142)
+		at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:166)
+		at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:88)
+		at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:491)
+		at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+		at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83)
+		at org.apache.catalina.valves.AbstractAccessLogValve.invoke(AbstractAccessLogValve.java:643)
+		at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72)
+		at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+		at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+		at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+		at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:939)
+		at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1832)
+		at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+		at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:973)
+		at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:491)
+		at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+		at java.base/java.lang.Thread.run(Thread.java:842)
+	Caused by: com.google.api.client.http.HttpResponseException: 404 Not Found
+POST https://fcm.googleapis.com/batch
+<!DOCTYPE html>
+<html lang=en>
+  <meta charset=utf-8>
+  <meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">
+  <title>Error 404 (Not Found)!!1</title>
+  <style>
+    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}
+  </style>
+  <a href=//www.google.com/><span id=logo aria-label=Google></span></a>
+  <p><b>404.</b> <ins>That’s an error.</ins>
+  <p>The requested URL <code>/batch</code> was not found on this server.  <ins>That’s all we know.</ins>
+
+		at com.google.api.client.http.HttpResponseException$Builder.build(HttpResponseException.java:293)
+		at com.google.api.client.http.HttpRequest.execute(HttpRequest.java:1118)
+		at com.google.api.client.googleapis.batch.BatchRequest.execute(BatchRequest.java:257)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl.sendBatchRequest(FirebaseMessagingClientImpl.java:138)
+		... 32 more
+17-Mar-2026 14:58:09.854 SEVERE [http-nio-8080-exec-6] org.apache.catalina.core.ApplicationContext.log SendNotificationCampaign: Failed to send push notifications.
+	com.google.firebase.messaging.FirebaseMessagingException: Unexpected HTTP response with status: 404
+<!DOCTYPE html>
+<html lang=en>
+  <meta charset=utf-8>
+  <meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">
+  <title>Error 404 (Not Found)!!1</title>
+  <style>
+    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}
+  </style>
+  <a href=//www.google.com/><span id=logo aria-label=Google></span></a>
+  <p><b>404.</b> <ins>That’s an error.</ins>
+  <p>The requested URL <code>/batch</code> was not found on this server.  <ins>That’s all we know.</ins>
+
+		at com.google.firebase.messaging.FirebaseMessagingException.withMessagingErrorCode(FirebaseMessagingException.java:51)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl$MessagingErrorHandler.createException(FirebaseMessagingClientImpl.java:293)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl$MessagingErrorHandler.createException(FirebaseMessagingClientImpl.java:282)
+		at com.google.firebase.internal.AbstractHttpErrorHandler.handleHttpResponseException(AbstractHttpErrorHandler.java:57)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl.sendBatchRequest(FirebaseMessagingClientImpl.java:144)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl.sendAll(FirebaseMessagingClientImpl.java:118)
+		at com.google.firebase.messaging.FirebaseMessaging$4.execute(FirebaseMessaging.java:494)
+		at com.google.firebase.messaging.FirebaseMessaging$4.execute(FirebaseMessaging.java:491)
+		at com.google.firebase.internal.CallableOperation.call(CallableOperation.java:36)
+		at com.google.firebase.messaging.FirebaseMessaging.sendAll(FirebaseMessaging.java:376)
+		at com.google.firebase.messaging.FirebaseMessaging.sendMulticast(FirebaseMessaging.java:451)
+		at com.google.firebase.messaging.FirebaseMessaging.sendMulticast(FirebaseMessaging.java:423)
+		at lk.iamlaky.controller.SendNotificationCampaign.doPost(SendNotificationCampaign.java:123)
+		at javax.servlet.http.HttpServlet.service(HttpServlet.java:555)
+		at javax.servlet.http.HttpServlet.service(HttpServlet.java:623)
+		at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:197)
+		at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:142)
+		at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+		at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:166)
+		at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:142)
+		at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:166)
+		at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:88)
+		at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:491)
+		at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+		at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83)
+		at org.apache.catalina.valves.AbstractAccessLogValve.invoke(AbstractAccessLogValve.java:643)
+		at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72)
+		at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+		at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+		at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+		at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:939)
+		at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1832)
+		at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+		at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:973)
+		at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:491)
+		at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+		at java.base/java.lang.Thread.run(Thread.java:842)
+	Caused by: com.google.api.client.http.HttpResponseException: 404 Not Found
+POST https://fcm.googleapis.com/batch
+<!DOCTYPE html>
+<html lang=en>
+  <meta charset=utf-8>
+  <meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">
+  <title>Error 404 (Not Found)!!1</title>
+  <style>
+    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}
+  </style>
+  <a href=//www.google.com/><span id=logo aria-label=Google></span></a>
+  <p><b>404.</b> <ins>That’s an error.</ins>
+  <p>The requested URL <code>/batch</code> was not found on this server.  <ins>That’s all we know.</ins>
+
+		at com.google.api.client.http.HttpResponseException$Builder.build(HttpResponseException.java:293)
+		at com.google.api.client.http.HttpRequest.execute(HttpRequest.java:1118)
+		at com.google.api.client.googleapis.batch.BatchRequest.execute(BatchRequest.java:257)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl.sendBatchRequest(FirebaseMessagingClientImpl.java:138)
+		... 32 more
+17-Mar-2026 15:14:14.877 SEVERE [http-nio-8080-exec-6] org.apache.catalina.core.ApplicationContext.log SendNotificationCampaign: Failed to send push notifications.
+	com.google.firebase.messaging.FirebaseMessagingException: Unexpected HTTP response with status: 404
+<!DOCTYPE html>
+<html lang=en>
+  <meta charset=utf-8>
+  <meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">
+  <title>Error 404 (Not Found)!!1</title>
+  <style>
+    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}
+  </style>
+  <a href=//www.google.com/><span id=logo aria-label=Google></span></a>
+  <p><b>404.</b> <ins>That’s an error.</ins>
+  <p>The requested URL <code>/batch</code> was not found on this server.  <ins>That’s all we know.</ins>
+
+		at com.google.firebase.messaging.FirebaseMessagingException.withMessagingErrorCode(FirebaseMessagingException.java:51)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl$MessagingErrorHandler.createException(FirebaseMessagingClientImpl.java:293)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl$MessagingErrorHandler.createException(FirebaseMessagingClientImpl.java:282)
+		at com.google.firebase.internal.AbstractHttpErrorHandler.handleHttpResponseException(AbstractHttpErrorHandler.java:57)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl.sendBatchRequest(FirebaseMessagingClientImpl.java:144)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl.sendAll(FirebaseMessagingClientImpl.java:118)
+		at com.google.firebase.messaging.FirebaseMessaging$4.execute(FirebaseMessaging.java:494)
+		at com.google.firebase.messaging.FirebaseMessaging$4.execute(FirebaseMessaging.java:491)
+		at com.google.firebase.internal.CallableOperation.call(CallableOperation.java:36)
+		at com.google.firebase.messaging.FirebaseMessaging.sendAll(FirebaseMessaging.java:376)
+		at com.google.firebase.messaging.FirebaseMessaging.sendMulticast(FirebaseMessaging.java:451)
+		at com.google.firebase.messaging.FirebaseMessaging.sendMulticast(FirebaseMessaging.java:423)
+		at lk.iamlaky.controller.SendNotificationCampaign.doPost(SendNotificationCampaign.java:123)
+		at javax.servlet.http.HttpServlet.service(HttpServlet.java:555)
+		at javax.servlet.http.HttpServlet.service(HttpServlet.java:623)
+		at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:197)
+		at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:142)
+		at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+		at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:166)
+		at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:142)
+		at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:166)
+		at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:88)
+		at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:491)
+		at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+		at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83)
+		at org.apache.catalina.valves.AbstractAccessLogValve.invoke(AbstractAccessLogValve.java:643)
+		at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72)
+		at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+		at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398)
+		at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+		at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:939)
+		at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1832)
+		at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+		at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:973)
+		at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:491)
+		at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+		at java.base/java.lang.Thread.run(Thread.java:842)
+	Caused by: com.google.api.client.http.HttpResponseException: 404 Not Found
+POST https://fcm.googleapis.com/batch
+<!DOCTYPE html>
+<html lang=en>
+  <meta charset=utf-8>
+  <meta name=viewport content="initial-scale=1, minimum-scale=1, width=device-width">
+  <title>Error 404 (Not Found)!!1</title>
+  <style>
+    *{margin:0;padding:0}html,code{font:15px/22px arial,sans-serif}html{background:#fff;color:#222;padding:15px}body{margin:7% auto 0;max-width:390px;min-height:180px;padding:30px 0 15px}* > body{background:url(//www.google.com/images/errors/robot.png) 100% 5px no-repeat;padding-right:205px}p{margin:11px 0 22px;overflow:hidden}ins{color:#777;text-decoration:none}a img{border:0}@media screen and (max-width:772px){body{background:none;margin-top:0;max-width:none;padding-right:0}}#logo{background:url(//www.google.com/images/branding/googlelogo/1x/googlelogo_color_150x54dp.png) no-repeat;margin-left:-5px}@media only screen and (min-resolution:192dpi){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat 0% 0%/100% 100%;-moz-border-image:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) 0}}@media only screen and (-webkit-min-device-pixel-ratio:2){#logo{background:url(//www.google.com/images/branding/googlelogo/2x/googlelogo_color_150x54dp.png) no-repeat;-webkit-background-size:100% 100%}}#logo{display:inline-block;height:54px;width:150px}
+  </style>
+  <a href=//www.google.com/><span id=logo aria-label=Google></span></a>
+  <p><b>404.</b> <ins>That’s an error.</ins>
+  <p>The requested URL <code>/batch</code> was not found on this server.  <ins>That’s all we know.</ins>
+
+		at com.google.api.client.http.HttpResponseException$Builder.build(HttpResponseException.java:293)
+		at com.google.api.client.http.HttpRequest.execute(HttpRequest.java:1118)
+		at com.google.api.client.googleapis.batch.BatchRequest.execute(BatchRequest.java:257)
+		at com.google.firebase.messaging.FirebaseMessagingClientImpl.sendBatchRequest(FirebaseMessagingClientImpl.java:138)
+		... 32 more
